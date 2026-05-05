@@ -25,7 +25,7 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
-  body{min-width:1600px}
+  body{min-width:1600px;transform-origin:top left}
 
   /* ===== TOP NAV ===== */
   .topbar{background:#fff;border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:32px}
@@ -437,20 +437,25 @@ function makeSpark(id, up=true){
   const el=document.getElementById('breadth');
   const chart=echarts.init(el);
   const x=[]; const up=[]; const ref=[]; const down=[];
-  for(let i=0;i<48;i++){
-    const t=`${(9+Math.floor(i/8))}:${((i%8)*7).toString().padStart(2,'0')}`;
-    x.push(t);
-    const u = 200 + Math.round(Math.random()*60) + i*1.2;
-    const r = 100 + Math.round(Math.random()*30);
-    const d = 350 - Math.round(u*0.4) + Math.round(Math.random()*40) - i*0.3;
-    up.push(u); ref.push(r); down.push(Math.max(150,d));
+  // 9:00 → 14:30, một điểm mỗi 5 phút (67 điểm), nhãn trục X mỗi 30 phút
+  const stepMin=5, totalMin=5*60+30;
+  const n=Math.floor(totalMin/stepMin)+1;
+  for(let i=0;i<n;i++){
+    const tm=i*stepMin;
+    const h=9+Math.floor(tm/60);
+    const m=tm%60;
+    x.push(`${h}:${m.toString().padStart(2,'0')}`);
+    const u=Math.round(200+Math.random()*60+i*0.6);
+    const r=Math.round(100+Math.random()*30);
+    const d=Math.max(150,Math.round(350-u*0.4+Math.random()*40-i*0.15));
+    up.push(u); ref.push(r); down.push(d);
   }
   // Force final values to match the legend totals shown in image
   up[up.length-1]=251; ref[ref.length-1]=118; down[down.length-1]=287;
 
   chart.setOption({
     grid:{left:36,right:90,top:14,bottom:42},
-    tooltip:{trigger:'axis'},
+    tooltip:{trigger:'axis',valueFormatter:v=>Math.round(v).toLocaleString('en-US')},
     legend:{
       bottom:0,left:'center',itemWidth:8,itemHeight:8,textStyle:{fontSize:11,color:'#6b7280'},
       data:[
@@ -462,14 +467,17 @@ function makeSpark(id, up=true){
     xAxis:{
       type:'category',data:x,boundaryGap:false,
       axisLine:{lineStyle:{color:'#e6e8ec'}},
-      axisLabel:{color:'#9ca3af',fontSize:9,rotate:55,interval:1},
+      axisLabel:{
+        color:'#9ca3af',fontSize:10,
+        interval:(idx,val)=>val.endsWith(':00')||val.endsWith(':30')
+      },
       axisTick:{show:false}
     },
     yAxis:{
       type:'value',
       axisLine:{show:false},axisTick:{show:false},
       splitLine:{lineStyle:{color:'#f1f3f5'}},
-      axisLabel:{color:'#9ca3af',fontSize:10,formatter:'{value}'},
+      axisLabel:{color:'#9ca3af',fontSize:10,formatter:v=>Math.round(v)},
       name:'Số CP',nameLocation:'end',nameTextStyle:{fontSize:10,color:'#9ca3af',padding:[0,0,0,-30]}
     },
     series:[
@@ -674,8 +682,18 @@ buildTable('topUp',1);
 buildTable('topDown',-1);
 buildTable('topVol',-1);
 
+/* ============== AUTO-FIT to viewport (responsive) ============== */
+function fitToViewport(){
+  const designWidth=1600;
+  const w=window.innerWidth;
+  const ratio=w>=designWidth?1:Math.max(0.55,w/designWidth);
+  document.body.style.zoom=ratio;
+}
+fitToViewport();
+
 /* resize */
 window.addEventListener('resize',()=>{
+  fitToViewport();
   document.querySelectorAll('div').forEach(d=>{
     const inst=echarts.getInstanceByDom(d);
     if(inst) inst.resize();
