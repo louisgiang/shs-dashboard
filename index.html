@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>SHS - Thị trường</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+<style>
+  :root{
+    --bg:#f5f6f8;
+    --card:#ffffff;
+    --border:#e6e8ec;
+    --text:#1a1a1a;
+    --text-2:#6b7280;
+    --text-3:#9ca3af;
+    --green:#00b894;
+    --green-2:#26d4a8;
+    --green-light:#e8f8f3;
+    --red:#ff4d4f;
+    --red-2:#ef4444;
+    --red-light:#feeceb;
+    --yellow:#f5b700;
+    --orange:#ff7a45;
+    --primary:#ff7a00;
+    --shadow:0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+  body{min-width:1600px}
+
+  /* ===== TOP NAV ===== */
+  .topbar{background:#fff;border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 24px;gap:32px}
+  .logo{font-size:24px;font-weight:800;color:var(--primary);letter-spacing:-1px}
+  .logo::before{content:"S";display:inline-block;width:28px;height:28px;background:var(--primary);color:#fff;border-radius:6px;text-align:center;line-height:28px;font-size:18px;margin-right:0;vertical-align:middle}
+  .nav{display:flex;gap:28px;flex:1}
+  .nav a{color:var(--text);text-decoration:none;font-size:14px;padding:6px 0;position:relative;font-weight:500}
+  .nav a.active{color:var(--primary);font-weight:600}
+  .nav a.active::after{content:"";position:absolute;left:0;right:0;bottom:-19px;height:2px;background:var(--primary)}
+  .topbar-right{display:flex;align-items:center;gap:18px}
+  .icon-btn{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--text-2);cursor:pointer}
+  .icon-btn:hover{background:#f3f4f6}
+  .user{display:flex;align-items:center;gap:10px}
+  .user-info{text-align:right;line-height:1.2}
+  .user-info .id{font-size:13px;font-weight:600}
+  .user-info .role{font-size:11px;color:var(--text-2)}
+  .avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#ffb380,#ff7a00);color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px}
+
+  /* ===== LAYOUT ===== */
+  .container{padding:16px 24px;display:flex;flex-direction:column;gap:16px}
+
+  /* ===== INDEX CARDS ===== */
+  .indices{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+  .idx-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;box-shadow:var(--shadow);position:relative}
+  .idx-card.active{border:2px solid var(--primary);padding:13px 15px}
+  .idx-left{flex:1}
+  .idx-name{font-size:15px;font-weight:700;color:var(--primary);margin-bottom:4px}
+  .idx-value{font-size:18px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:4px}
+  .idx-value .arrow{font-size:14px}
+  .idx-change{font-size:11px;color:var(--green);margin-left:4px;font-weight:500}
+  .idx-stats{font-size:11px;color:var(--text-2);margin-top:6px;display:flex;gap:10px}
+  .idx-counts{font-size:11px;margin-top:4px;display:flex;gap:8px;align-items:center}
+  .cnt-up{color:var(--green)}
+  .cnt-ref{color:var(--yellow)}
+  .cnt-down{color:var(--red)}
+  .idx-right{width:90px;text-align:right}
+  .idx-spark{height:42px;width:90px}
+  .idx-session{font-size:10px;color:var(--text-2);margin-top:2px}
+
+  /* ===== ROW 1 (3 cols) ===== */
+  .row{display:grid;gap:16px}
+  .row-3{grid-template-columns:1fr 1fr 1fr}
+  .row-2-1{grid-template-columns:2fr 1fr}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+  .panel-title{font-size:14px;font-weight:600;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+  .chart{width:100%;height:280px}
+  .chart-tall{height:340px}
+
+  /* tabs in panel */
+  .tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:8px}
+  .tab{padding:6px 12px;font-size:13px;color:var(--text-2);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+  .tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+
+  /* foreign panel */
+  .foreign-list{display:flex;gap:0;height:280px}
+  .foreign-col{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:0 4px}
+  .foreign-row{display:flex;align-items:center;gap:6px;font-size:11px;height:22px}
+  .foreign-row.left{justify-content:flex-end}
+  .foreign-bar{height:14px;border-radius:2px;flex:1;max-width:120px}
+  .foreign-bar.green{background:var(--green-2)}
+  .foreign-bar.red{background:var(--red-2)}
+  .foreign-val{font-weight:500;min-width:40px}
+  .foreign-val.green{color:var(--green);text-align:right}
+  .foreign-val.red{color:var(--red)}
+  .foreign-tick{color:var(--text-2);min-width:30px;text-align:center;font-weight:500}
+
+  /* Buttons toggle */
+  .btn-group{display:flex;gap:6px}
+  .btn-toggle{padding:5px 12px;font-size:12px;background:#f3f4f6;border:1px solid var(--border);border-radius:6px;cursor:pointer;color:var(--text-2)}
+  .btn-toggle.active{background:#fff5eb;color:var(--primary);border-color:#ffd6a8}
+
+  /* News */
+  .news-tabs{display:flex;gap:18px;align-items:center;margin-bottom:12px;flex-wrap:nowrap;overflow-x:auto}
+  .news-tab{font-size:13px;color:var(--text-2);cursor:pointer;white-space:nowrap;padding:5px 10px;border-radius:6px}
+  .news-tab.active{color:var(--primary);background:#fff5eb;font-weight:500}
+  .news-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 24px}
+  .news-item{display:flex;gap:10px;align-items:flex-start}
+  .news-thumb{width:62px;height:62px;border-radius:6px;flex-shrink:0;background:linear-gradient(135deg,#1a3a52,#2d5a7a);position:relative;overflow:hidden}
+  .news-thumb::after{content:"2025";position:absolute;top:4px;right:4px;color:#ffb84d;font-size:10px;font-weight:700}
+  .news-thumb::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 70%,rgba(255,200,100,.4),transparent 60%)}
+  .news-body{flex:1;min-width:0}
+  .news-title{font-size:13px;line-height:1.4;margin-bottom:6px;color:var(--text)}
+  .news-meta{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--text-2)}
+  .news-source{background:#d63031;color:#fff;font-size:9px;padding:2px 5px;border-radius:2px;font-weight:700}
+  .news-more{text-align:center;color:var(--primary);font-size:13px;cursor:pointer;margin-top:12px;font-weight:500}
+
+  /* recommendations */
+  .rec-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .rec-card{border:1px solid var(--border);border-radius:8px;padding:10px 12px}
+  .rec-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+  .rec-symbol{font-size:14px;font-weight:700;color:var(--primary)}
+  .rec-price{font-size:13px;font-weight:700;color:var(--green)}
+  .rec-change{font-size:10px;color:var(--green);margin-top:2px}
+  .rec-rows{font-size:11px;color:var(--text-2)}
+  .rec-row{display:flex;justify-content:space-between;padding:2px 0}
+  .rec-row .val{color:var(--text);font-weight:500}
+  .rec-link{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);text-align:center;color:var(--primary);font-size:11px;cursor:pointer;font-weight:500}
+
+  /* tables */
+  .table{width:100%;border-collapse:collapse;font-size:12px}
+  .table thead th{text-align:left;padding:8px 10px;font-weight:500;color:var(--text-2);border-bottom:1px solid var(--border);font-size:11px}
+  .table thead th.right{text-align:right}
+  .table tbody td{padding:7px 10px;border-bottom:1px solid #f1f3f5}
+  .table tbody td.right{text-align:right}
+  .table tbody tr:last-child td{border-bottom:none}
+  .sym{font-weight:600}
+  .pos{color:var(--green);font-weight:500}
+  .neg{color:var(--red);font-weight:500}
+
+  /* heatmap */
+  #heatmap{width:100%;height:340px}
+
+  /* small helpers */
+  .flex-between{display:flex;justify-content:space-between;align-items:center}
+</style>
+</head>
+<body>
+
+<!-- ============== TOP BAR ============== -->
+<div class="topbar">
+  <div class="logo"></div>
+  <div class="nav">
+    <a href="#">Bảng giá</a>
+    <a href="#" class="active">Thị trường</a>
+    <a href="#">Giao dịch</a>
+    <a href="#">Tài sản</a>
+    <a href="#">Quản lý tiền</a>
+    <a href="#">Báo cáo</a>
+    <a href="#">Quản lý dịch vụ</a>
+  </div>
+  <div class="topbar-right">
+    <div class="icon-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    </div>
+    <div class="icon-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    </div>
+    <div class="user">
+      <div class="user-info">
+        <div class="id">069C032463</div>
+        <div class="role">Bạc</div>
+      </div>
+      <div class="avatar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4 0-9 2-9 6v2h18v-2c0-4-5-6-9-6Z"/></svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ============== INDEX CARDS ============== -->
+  <div class="indices">
+    <!-- VN-Index (active) -->
+    <div class="idx-card active">
+      <div class="idx-left">
+        <div class="idx-name">VN-Index</div>
+        <div class="idx-value"><span class="arrow">↑</span>1932.47<span class="idx-change">(+ 7.23 +0.95%)</span></div>
+        <div class="idx-stats"><span>9,018,510 CP</span><span>239,018,510 Tỷ</span></div>
+        <div class="idx-counts">
+          <span class="cnt-up">↑ 32 (7)</span>
+          <span class="cnt-ref">● 80</span>
+          <span class="cnt-down">↓ 47 (23)</span>
+        </div>
+      </div>
+      <div class="idx-right">
+        <div class="idx-spark" id="spark1"></div>
+        <div class="idx-session">Phiên ATC</div>
+      </div>
+    </div>
+    <!-- VN30 -->
+    <div class="idx-card">
+      <div class="idx-left">
+        <div class="idx-name">VN30</div>
+        <div class="idx-value"><span class="arrow">↑</span>1932.47<span class="idx-change">(+ 7.23 +0.95%)</span></div>
+        <div class="idx-stats"><span>9,018,510 CP</span><span>239,018,510 Tỷ</span></div>
+        <div class="idx-counts">
+          <span class="cnt-up">↑ 32 (7)</span>
+          <span class="cnt-ref">● 80</span>
+          <span class="cnt-down">↓ 47 (23)</span>
+        </div>
+      </div>
+      <div class="idx-right">
+        <div class="idx-spark" id="spark2"></div>
+        <div class="idx-session">Phiên ATC</div>
+      </div>
+    </div>
+    <!-- HNX -->
+    <div class="idx-card">
+      <div class="idx-left">
+        <div class="idx-name">HNX</div>
+        <div class="idx-value"><span class="arrow">↑</span>1932.47<span class="idx-change">(+ 7.23 +0.95%)</span></div>
+        <div class="idx-stats"><span>9,018,510 CP</span><span>239,018,510 Tỷ</span></div>
+        <div class="idx-counts">
+          <span class="cnt-up">↑ 32 (7)</span>
+          <span class="cnt-ref">● 80</span>
+          <span class="cnt-down">↓ 47 (23)</span>
+        </div>
+      </div>
+      <div class="idx-right">
+        <div class="idx-spark" id="spark3"></div>
+        <div class="idx-session">Phiên ATC</div>
+      </div>
+    </div>
+    <!-- HNX30 -->
+    <div class="idx-card">
+      <div class="idx-left">
+        <div class="idx-name">HNX30</div>
+        <div class="idx-value"><span class="arrow">↑</span>1932.47<span class="idx-change">(+ 7.23 +0.95%)</span></div>
+        <div class="idx-stats"><span>9,018,510 CP</span><span>239,018,510 Tỷ</span></div>
+        <div class="idx-counts">
+          <span class="cnt-up">↑ 32 (7)</span>
+          <span class="cnt-ref">● 80</span>
+          <span class="cnt-down">↓ 47 (23)</span>
+        </div>
+      </div>
+      <div class="idx-right">
+        <div class="idx-spark" id="spark4"></div>
+        <div class="idx-session">Phiên ATC</div>
+      </div>
+    </div>
+    <!-- UPCOM -->
+    <div class="idx-card">
+      <div class="idx-left">
+        <div class="idx-name">UPCOM</div>
+        <div class="idx-value"><span class="arrow">↑</span>1932.47<span class="idx-change">(+ 7.23 +0.95%)</span></div>
+        <div class="idx-stats"><span>9,018,510 CP</span><span>239,018,510 Tỷ</span></div>
+        <div class="idx-counts">
+          <span class="cnt-up">↑ 32 (7)</span>
+          <span class="cnt-ref">● 80</span>
+          <span class="cnt-down">↓ 47 (23)</span>
+        </div>
+      </div>
+      <div class="idx-right">
+        <div class="idx-spark" id="spark5"></div>
+        <div class="idx-session">Phiên ATC</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============== ROW: Liquidity / Breadth / Foreign ============== -->
+  <div class="row row-3">
+    <div class="panel">
+      <div class="panel-title">Thanh khoản</div>
+      <div class="chart" id="liquidity"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Độ rộng thị trường</div>
+      <div class="chart" id="breadth"></div>
+    </div>
+    <div class="panel">
+      <div class="tabs">
+        <div class="tab active">Nước ngoài</div>
+        <div class="tab">Tự doanh</div>
+      </div>
+      <div class="foreign-list" id="foreign"></div>
+    </div>
+  </div>
+
+  <!-- ============== ROW: Contribution / Heatmap ============== -->
+  <div class="row row-2-1">
+    <div class="panel">
+      <div class="panel-title">Nhóm ảnh hưởng đến chỉ số</div>
+      <div class="chart chart-tall" id="contribution"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">
+        Bản đồ nhiệt
+        <div class="btn-group">
+          <button class="btn-toggle active">Giá trị giao dịch</button>
+          <button class="btn-toggle">Vốn hóa</button>
+        </div>
+      </div>
+      <div id="heatmap"></div>
+    </div>
+  </div>
+
+  <!-- ============== ROW: News / Recommendations ============== -->
+  <div class="row row-2-1">
+    <div class="panel">
+      <div class="flex-between" style="margin-bottom:12px">
+        <div class="panel-title" style="margin:0">Tin tức</div>
+        <div class="news-tabs">
+          <div class="news-tab active">Tin liên quan danh mục nắm giữ</div>
+          <div class="news-tab">Báo cáo phân tích từ SHS</div>
+          <div class="news-tab">Tin cập nhật chung</div>
+          <div class="news-tab">Tin cập nhật chung</div>
+          <div class="news-tab">Chứng khoán</div>
+          <div class="news-tab">Bất động sản ›</div>
+        </div>
+      </div>
+      <div class="news-grid" id="newsGrid"></div>
+      <div class="news-more">Xem thêm</div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Khuyến nghị đầu tư</div>
+      <div class="rec-grid" id="recGrid"></div>
+    </div>
+  </div>
+
+  <!-- ============== ROW: Top tables ============== -->
+  <div class="row row-3">
+    <div class="panel">
+      <div class="panel-title">Top cổ phiếu tăng</div>
+      <table class="table" id="topUp"></table>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Top cổ phiếu giảm</div>
+      <table class="table" id="topDown"></table>
+    </div>
+    <div class="panel">
+      <div class="panel-title">
+        Top cổ phiếu đột biến
+        <div class="btn-group">
+          <button class="btn-toggle active">Giá trị giao dịch</button>
+          <button class="btn-toggle">Khối lượng</button>
+        </div>
+      </div>
+      <table class="table" id="topVol"></table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============== UTIL: random walk for sparklines ============== */
+function makeSpark(id, up=true){
+  const el=document.getElementById(id);
+  const chart=echarts.init(el);
+  const data=[]; let v=100;
+  for(let i=0;i<40;i++){ v += (Math.random()-0.5)*3; data.push(v); }
+  if(up) data[data.length-1]=Math.max(...data)+0.5;
+  const color=up?'#00b894':'#ff4d4f';
+  chart.setOption({
+    grid:{left:0,right:0,top:2,bottom:2},
+    xAxis:{type:'category',show:false,data:data.map((_,i)=>i)},
+    yAxis:{type:'value',show:false,scale:true},
+    series:[{
+      type:'line',data,smooth:true,showSymbol:false,
+      lineStyle:{color,width:1.5},
+      areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[
+        {offset:0,color:up?'rgba(0,184,148,0.35)':'rgba(255,77,79,0.35)'},
+        {offset:1,color:'rgba(255,255,255,0)'}
+      ])},
+      markLine:{symbol:'none',lineStyle:{color:'#bbb',type:'dashed',width:1},data:[{yAxis:data[0]}]}
+    }]
+  });
+}
+['spark1','spark2','spark3','spark4','spark5'].forEach(id=>makeSpark(id,true));
+
+/* ============== LIQUIDITY ============== */
+(function(){
+  const el=document.getElementById('liquidity');
+  const chart=echarts.init(el);
+  const times=[]; const today=[]; const yest=[];
+  const start=9, end=15;
+  let cur=0, curY=0;
+  for(let h=start;h<=end;h++){
+    for(let m=0;m<60;m+=15){
+      if(h===15 && m>0) break;
+      times.push(`${h}:${m.toString().padStart(2,'0')}`);
+      cur += Math.random()*2500 + 1500;
+      curY += Math.random()*2200 + 1300;
+      today.push(cur);
+      yest.push(curY);
+    }
+  }
+  chart.setOption({
+    grid:{left:48,right:18,top:20,bottom:34},
+    tooltip:{trigger:'axis'},
+    legend:{
+      bottom:0,left:0,
+      data:[
+        {name:'GTGD phiên trước',icon:'rect'},
+        {name:'GTGD hôm nay',icon:'rect'}
+      ],
+      itemWidth:14,itemHeight:3,textStyle:{fontSize:11,color:'#6b7280'}
+    },
+    xAxis:{
+      type:'category',data:times,
+      axisLine:{lineStyle:{color:'#e6e8ec'}},
+      axisLabel:{color:'#9ca3af',fontSize:10,interval:3},
+      axisTick:{show:false}
+    },
+    yAxis:{
+      type:'value',
+      axisLine:{show:false},axisTick:{show:false},
+      splitLine:{lineStyle:{color:'#f1f3f5'}},
+      axisLabel:{color:'#9ca3af',fontSize:10,formatter:v=>(v/1).toLocaleString('en-US',{minimumFractionDigits:2})+' tỷ'}
+    },
+    series:[
+      {name:'GTGD phiên trước',type:'line',data:yest,smooth:true,showSymbol:false,
+        lineStyle:{color:'#9ca3af',width:1.5,type:'solid'}},
+      {name:'GTGD hôm nay',type:'line',data:today,smooth:true,showSymbol:false,
+        lineStyle:{color:'#00b894',width:2},
+        areaStyle:{color:new echarts.graphic.LinearGradient(0,0,0,1,[
+          {offset:0,color:'rgba(0,184,148,0.4)'},
+          {offset:1,color:'rgba(0,184,148,0)'}
+        ])}
+      }
+    ]
+  });
+})();
+
+/* ============== BREADTH ============== */
+(function(){
+  const el=document.getElementById('breadth');
+  const chart=echarts.init(el);
+  const x=[]; const up=[]; const ref=[]; const down=[];
+  for(let i=0;i<48;i++){
+    const t=`${(9+Math.floor(i/8))}:${((i%8)*7).toString().padStart(2,'0')}`;
+    x.push(t);
+    const u = 200 + Math.round(Math.random()*60) + i*1.2;
+    const r = 100 + Math.round(Math.random()*30);
+    const d = 350 - Math.round(u*0.4) + Math.round(Math.random()*40) - i*0.3;
+    up.push(u); ref.push(r); down.push(Math.max(150,d));
+  }
+  // Force final values to match the legend totals shown in image
+  up[up.length-1]=251; ref[ref.length-1]=118; down[down.length-1]=287;
+
+  chart.setOption({
+    grid:{left:36,right:90,top:14,bottom:42},
+    tooltip:{trigger:'axis'},
+    legend:{
+      bottom:0,left:'center',itemWidth:8,itemHeight:8,textStyle:{fontSize:11,color:'#6b7280'},
+      data:[
+        {name:'Tăng giá',icon:'circle'},
+        {name:'Tham chiếu',icon:'circle'},
+        {name:'Giảm giá',icon:'circle'}
+      ]
+    },
+    xAxis:{
+      type:'category',data:x,boundaryGap:false,
+      axisLine:{lineStyle:{color:'#e6e8ec'}},
+      axisLabel:{color:'#9ca3af',fontSize:9,rotate:55,interval:1},
+      axisTick:{show:false}
+    },
+    yAxis:{
+      type:'value',
+      axisLine:{show:false},axisTick:{show:false},
+      splitLine:{lineStyle:{color:'#f1f3f5'}},
+      axisLabel:{color:'#9ca3af',fontSize:10,formatter:'{value}'},
+      name:'Số CP',nameLocation:'end',nameTextStyle:{fontSize:10,color:'#9ca3af',padding:[0,0,0,-30]}
+    },
+    series:[
+      {name:'Tăng giá',type:'line',stack:'a',data:up,smooth:true,showSymbol:false,
+        lineStyle:{width:0},
+        areaStyle:{color:'#26d4a8'}},
+      {name:'Tham chiếu',type:'line',stack:'a',data:ref,smooth:true,showSymbol:false,
+        lineStyle:{width:0},
+        areaStyle:{color:'#f5b700'}},
+      {name:'Giảm giá',type:'line',stack:'a',data:down,smooth:true,showSymbol:false,
+        lineStyle:{width:0},
+        areaStyle:{color:'#ff4d4f'}}
+    ],
+    graphic:[
+      {type:'group',left:'82%',top:'18%',children:[
+        {type:'rect',shape:{width:74,height:24,r:4},style:{fill:'#fff',stroke:'#e6e8ec'}},
+        {type:'text',style:{text:'251 (38.26%)',x:8,y:16,fontSize:11,fill:'#1a1a1a'}}
+      ]},
+      {type:'group',left:'82%',top:'45%',children:[
+        {type:'rect',shape:{width:74,height:24,r:4},style:{fill:'#fff',stroke:'#e6e8ec'}},
+        {type:'text',style:{text:'118 (17.99%)',x:8,y:16,fontSize:11,fill:'#1a1a1a'}}
+      ]},
+      {type:'group',left:'82%',top:'72%',children:[
+        {type:'rect',shape:{width:74,height:24,r:4},style:{fill:'#fff',stroke:'#e6e8ec'}},
+        {type:'text',style:{text:'287 (43.75%)',x:8,y:16,fontSize:11,fill:'#1a1a1a'}}
+      ]}
+    ]
+  });
+})();
+
+/* ============== FOREIGN (mua/bán) ============== */
+(function(){
+  const wrap=document.getElementById('foreign');
+  // build 12 rows, two columns (left=buy green, right=sell red)
+  const rows=12;
+  const left=document.createElement('div'); left.className='foreign-col';
+  const right=document.createElement('div'); right.className='foreign-col';
+  for(let i=0;i<rows;i++){
+    // left side
+    const lr=document.createElement('div'); lr.className='foreign-row left';
+    lr.innerHTML=`<span class="foreign-val green">100.56</span><div class="foreign-bar green" style="max-width:${110-i*4}px"></div><span class="foreign-tick">SHS</span>`;
+    left.appendChild(lr);
+    // right side
+    const rr=document.createElement('div'); rr.className='foreign-row';
+    rr.innerHTML=`<span class="foreign-tick">SHS</span><div class="foreign-bar red" style="max-width:${50+i*5}px"></div><span class="foreign-val red">100.56</span>`;
+    right.appendChild(rr);
+  }
+  wrap.appendChild(left); wrap.appendChild(right);
+})();
+
+/* ============== CONTRIBUTION (waterfall-ish bar) ============== */
+(function(){
+  const el=document.getElementById('contribution');
+  const chart=echarts.init(el);
+  const labels=[]; const data=[];
+  // 22 bars: first ~10 positive (decreasing), rest negative (increasing magnitude)
+  for(let i=0;i<11;i++){ labels.push('HPG'); data.push(+(1.2 - i*0.10 - Math.random()*0.05).toFixed(2)); }
+  for(let i=0;i<11;i++){ labels.push('HPG'); data.push(-(0.15 + i*0.18 + Math.random()*0.1).toFixed(2)); }
+  chart.setOption({
+    grid:{left:48,right:18,top:18,bottom:38},
+    tooltip:{trigger:'axis',axisPointer:{type:'shadow'}},
+    xAxis:{
+      type:'category',data:labels,
+      axisLine:{lineStyle:{color:'#e6e8ec'}},
+      axisLabel:{color:'#9ca3af',fontSize:10,rotate:0},
+      axisTick:{show:false}
+    },
+    yAxis:{
+      type:'value',
+      name:'Mức độ đóng góp (điểm)',
+      nameLocation:'middle',nameRotate:90,nameGap:34,
+      nameTextStyle:{fontSize:10,color:'#9ca3af'},
+      axisLine:{show:false},axisTick:{show:false},
+      splitLine:{lineStyle:{color:'#f1f3f5'}},
+      axisLabel:{color:'#9ca3af',fontSize:10}
+    },
+    series:[{
+      type:'bar',data,barWidth:'58%',
+      itemStyle:{color:p=>p.value>=0?'#26d4a8':'#ff4d4f',borderRadius:[2,2,0,0]}
+    }]
+  });
+})();
+
+/* ============== HEATMAP (treemap) ============== */
+(function(){
+  const el=document.getElementById('heatmap');
+  const chart=echarts.init(el);
+  // approximated layout from the image
+  const rawGreen=[
+    {n:'HPG',v:2893.21},{n:'NVL',v:868.29},{n:'VHM',v:789.91},
+    {n:'MSN',v:594.4},{n:'STB',v:964.41}
+  ];
+  const rawRed=[
+    {n:'SHB',v:744.22},{n:'VIC',v:656.58},{n:'MWG',v:622.95},
+    {n:'SSI',v:619.5},{n:'VIX',v:524.66},{n:'VPI',v:503.13},{n:'EIB',v:421.64},
+    {n:'CII',v:408.66},{n:'HCM',v:397.99},{n:'VCB',v:382.83},
+    {n:'SHS',v:380.22},{n:'MBB',v:345.01},{n:'TCB',v:338.37},{n:'VNM',v:329.54},{n:'BID',v:325.51},{n:'VRE',v:315.96},{n:'VJC',v:262.83},
+    {n:'HDB',v:254.45},
+    {n:'FPT',v:540.03},{n:'VPB',v:355.51}
+  ];
+  const data=[
+    ...rawGreen.map(d=>({name:d.n,value:d.v,itemStyle:{color:'#26d4a8'}, label:{formatter:`{b|${d.n}}\n{c|${d.v.toFixed(2)} tỷ}`}})),
+    ...rawRed.map(d=>({name:d.n,value:d.v,itemStyle:{color:'#ff4d4f'}, label:{formatter:`{b|${d.n}}\n{c|${d.v.toFixed(2)} tỷ}`}})),
+    // a couple of green tiles among red bottom-right
+    {name:'X1',value:120,itemStyle:{color:'#26d4a8'},label:{show:false}},
+    {name:'X2',value:90,itemStyle:{color:'#26d4a8'},label:{show:false}}
+  ];
+  chart.setOption({
+    tooltip:{formatter:p=>`${p.name}<br/>${(p.value).toFixed(2)} tỷ`},
+    series:[{
+      type:'treemap',
+      roam:false,
+      nodeClick:false,
+      breadcrumb:{show:false},
+      width:'100%',height:'100%',
+      top:0,left:0,
+      data,
+      label:{
+        show:true,
+        rich:{
+          b:{fontSize:13,fontWeight:700,color:'#fff',lineHeight:18},
+          c:{fontSize:11,color:'rgba(255,255,255,0.92)',lineHeight:14}
+        }
+      },
+      itemStyle:{borderColor:'#fff',borderWidth:1,gapWidth:2}
+    }]
+  });
+})();
+
+/* ============== NEWS ============== */
+(function(){
+  const grid=document.getElementById('newsGrid');
+  for(let i=0;i<6;i++){
+    const it=document.createElement('div'); it.className='news-item';
+    it.innerHTML=`
+      <div class="news-thumb"></div>
+      <div class="news-body">
+        <div class="news-title">SHS: Đại hội đồng cổ đông 2026 diễn ra tốt đẹp</div>
+        <div class="news-meta">
+          <span class="news-source">DAN TRI</span>
+          <span>05:00 | 06/06/2026</span>
+        </div>
+      </div>`;
+    grid.appendChild(it);
+  }
+})();
+
+/* ============== RECOMMENDATIONS ============== */
+(function(){
+  const grid=document.getElementById('recGrid');
+  for(let i=0;i<4;i++){
+    const c=document.createElement('div'); c.className='rec-card';
+    c.innerHTML=`
+      <div class="rec-head">
+        <div>
+          <div class="rec-symbol">SHS</div>
+          <div class="rec-price">↑100.50</div>
+          <div class="rec-change">(+ 7.23 +0.95%)</div>
+        </div>
+        <div class="rec-rows" style="text-align:right">
+          <div class="rec-row" style="gap:18px"><span>Vùng mua</span><span class="val">100 - 105.50</span></div>
+          <div class="rec-row" style="gap:18px"><span>Chốt lãi</span><span class="val">150 - 155.50</span></div>
+          <div class="rec-row" style="gap:18px"><span>Cắt lỗ</span><span class="val">90 - 94</span></div>
+        </div>
+      </div>
+      <div class="rec-link">Luận điểm khuyến nghị</div>
+    `;
+    grid.appendChild(c);
+  }
+})();
+
+/* ============== TOP TABLES ============== */
+function buildTable(id, sign){
+  const tbl=document.getElementById(id);
+  const headers=['STT','Mã CK','Giá','Thay đổi','Giá trị (tỷ đồng)'];
+  const thead=document.createElement('thead');
+  const trh=document.createElement('tr');
+  headers.forEach((h,i)=>{
+    const th=document.createElement('th');
+    th.textContent=h;
+    if(i===4) th.className='right';
+    trh.appendChild(th);
+  });
+  thead.appendChild(trh); tbl.appendChild(thead);
+  const tbody=document.createElement('tbody');
+  for(let i=1;i<=10;i++){
+    const tr=document.createElement('tr');
+    const cls=sign>0?'pos':'neg';
+    const arrow=sign>0?'+':'-';
+    const pct=sign>0?'+5.67%':'-5.67%';
+    tr.innerHTML=`
+      <td>${i}</td>
+      <td class="sym">HPG</td>
+      <td class="${cls}">30.50</td>
+      <td class="${cls}">${arrow} 5.0 (${pct})</td>
+      <td class="right">1000.50</td>`;
+    tbody.appendChild(tr);
+  }
+  tbl.appendChild(tbody);
+}
+buildTable('topUp',1);
+buildTable('topDown',-1);
+buildTable('topVol',-1);
+
+/* resize */
+window.addEventListener('resize',()=>{
+  document.querySelectorAll('div').forEach(d=>{
+    const inst=echarts.getInstanceByDom(d);
+    if(inst) inst.resize();
+  });
+});
+</script>
+</body>
+</html>
