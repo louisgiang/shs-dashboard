@@ -515,14 +515,24 @@ function makeSpark(id, up=true){
   const rows=12;
   const left=document.createElement('div'); left.className='foreign-col';
   const right=document.createElement('div'); right.className='foreign-col';
+  // Sinh giá trị giảm dần cho cả 2 cột (lớn → nhỏ)
+  const buyVals=[]; const sellVals=[];
+  let bv=120, sv=110;
   for(let i=0;i<rows;i++){
-    // left side
+    bv -= 4 + Math.random()*3;  buyVals.push(+bv.toFixed(2));
+    sv -= 4 + Math.random()*3;  sellVals.push(+sv.toFixed(2));
+  }
+  const maxBuy=buyVals[0], maxSell=sellVals[0];
+  for(let i=0;i<rows;i++){
+    // left (mua - xanh)
     const lr=document.createElement('div'); lr.className='foreign-row left';
-    lr.innerHTML=`<span class="foreign-val green">100.56</span><div class="foreign-bar green" style="max-width:${110-i*4}px"></div><span class="foreign-tick">SHS</span>`;
+    const lw=Math.max(20, Math.round(120*buyVals[i]/maxBuy));
+    lr.innerHTML=`<span class="foreign-val green">${buyVals[i].toFixed(2)}</span><div class="foreign-bar green" style="max-width:${lw}px"></div><span class="foreign-tick">SHS</span>`;
     left.appendChild(lr);
-    // right side
+    // right (bán - đỏ)
     const rr=document.createElement('div'); rr.className='foreign-row';
-    rr.innerHTML=`<span class="foreign-tick">SHS</span><div class="foreign-bar red" style="max-width:${50+i*5}px"></div><span class="foreign-val red">100.56</span>`;
+    const rw=Math.max(20, Math.round(120*sellVals[i]/maxSell));
+    rr.innerHTML=`<span class="foreign-tick">SHS</span><div class="foreign-bar red" style="max-width:${rw}px"></div><span class="foreign-val red">${sellVals[i].toFixed(2)}</span>`;
     right.appendChild(rr);
   }
   wrap.appendChild(left); wrap.appendChild(right);
