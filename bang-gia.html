@@ -106,11 +106,15 @@
   .stat-flat{color:var(--yellow)}
   .stat-down{color:var(--red)}
   .stat-flat::before{content:"●";margin-right:2px}
-  .idx-vol{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:4px;border-top:1px dashed var(--border);padding-top:6px}
-  .idx-vol .pill{padding:1px 8px;background:var(--bg-soft);border-radius:6px}
-  .idx-chart{position:relative}
-  .idx-chart svg{width:100%;height:60px}
-  .idx-chart .x-axis{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px}
+  .idx-vol{
+    font-size:11px;color:var(--muted);
+    display:flex;justify-content:space-between;gap:6px;
+    margin-top:6px;border-top:1px dashed var(--border);padding-top:8px;
+    grid-column:1 / -1;
+  }
+  .idx-vol .pill{padding:2px 8px;background:var(--bg-soft);border-radius:6px;white-space:nowrap}
+  .idx-chart{position:relative;display:flex;align-items:center;justify-content:center}
+  .idx-chart svg{width:100%;height:78px}
 
   .idx-table{
     background:#fff;border-radius:12px;border:1px solid var(--border);
@@ -346,16 +350,11 @@
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-change">+7,23 (+0,95%)</div>
       <div class="idx-stats">
         <span class="stat-up">↑ 32 (7)</span>
         <span class="stat-flat">80</span>
         <span class="stat-down">↓ 47 (23)</span>
-      </div>
-      <div class="idx-vol">
-        <span class="pill">9,018,510 CP</span>
-        <span class="pill">239,018,510 Tỷ</span>
-        <span class="pill">Phiên ATO</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -370,7 +369,11 @@
         <path d="M0,20 L20,15 L35,28 L50,22 L65,35 L80,30 L95,40 L110,28 L130,32 L150,20 L170,28 L190,18 L200,15" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
         <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
       </svg>
-      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+    <div class="idx-vol">
+      <span class="pill">9,018,510 CP</span>
+      <span class="pill">239,018 Tỷ</span>
+      <span class="pill">Phiên ATO</span>
     </div>
   </div>
 
@@ -379,16 +382,11 @@
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-change">+7,23 (+0,95%)</div>
       <div class="idx-stats">
         <span class="stat-up">↑ 32 (7)</span>
         <span class="stat-flat">80</span>
         <span class="stat-down">↓ 47 (23)</span>
-      </div>
-      <div class="idx-vol">
-        <span class="pill">9,018,510 CP</span>
-        <span class="pill">239,018,510 Tỷ</span>
-        <span class="pill">Phiên ATO</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -403,7 +401,11 @@
         <path d="M0,18 L18,22 L35,15 L52,28 L70,25 L88,38 L106,30 L124,42 L142,28 L160,32 L178,20 L195,25 L200,18" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
         <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
       </svg>
-      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+    <div class="idx-vol">
+      <span class="pill">9,018,510 CP</span>
+      <span class="pill">239,018 Tỷ</span>
+      <span class="pill">Phiên ATO</span>
     </div>
   </div>
 
@@ -412,16 +414,11 @@
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-change">+7,23 (+0,95%)</div>
       <div class="idx-stats">
         <span class="stat-up">↑ 32 (7)</span>
         <span class="stat-flat">80</span>
         <span class="stat-down">↓ 47 (23)</span>
-      </div>
-      <div class="idx-vol">
-        <span class="pill">9,018,510 CP</span>
-        <span class="pill">239,018,510 Tỷ</span>
-        <span class="pill">Phiên ATO</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -430,7 +427,11 @@
         <path d="M0,22 L22,18 L40,30 L58,24 L76,36 L94,28 L112,42 L130,30 L148,38 L166,22 L184,30 L200,20" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
         <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
       </svg>
-      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+    <div class="idx-vol">
+      <span class="pill">9,018,510 CP</span>
+      <span class="pill">239,018 Tỷ</span>
+      <span class="pill">Phiên ATO</span>
     </div>
   </div>
 
@@ -439,16 +440,11 @@
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-change">+7,23 (+0,95%)</div>
       <div class="idx-stats">
         <span class="stat-up">↑ 32 (7)</span>
         <span class="stat-flat">80</span>
         <span class="stat-down">↓ 47 (23)</span>
-      </div>
-      <div class="idx-vol">
-        <span class="pill">9,018,510 CP</span>
-        <span class="pill">239,018,510 Tỷ</span>
-        <span class="pill">Phiên ATO</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -457,7 +453,11 @@
         <path d="M0,25 L20,20 L40,32 L60,26 L80,38 L100,30 L120,40 L140,28 L160,34 L180,22 L200,16" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
         <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
       </svg>
-      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+    <div class="idx-vol">
+      <span class="pill">9,018,510 CP</span>
+      <span class="pill">239,018 Tỷ</span>
+      <span class="pill">Phiên ATO</span>
     </div>
   </div>
 
