@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bảng giá chứng khoán</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#ffffff;
+    --bg-soft:#f7f8fa;
+    --border:#e7eaee;
+    --text:#1f2430;
+    --muted:#7c8493;
+    --orange:#ff8a1f;
+    --orange-soft:#fff3e6;
+    --green:#1ec78b;
+    --green-soft:#e8f9f1;
+    --red:#ef4646;
+    --red-soft:#fde9e9;
+    --yellow:#f5b300;
+    --blue:#3b82f6;
+    --purple:#a855f7;
+    --row-alt:#fafbfc;
+    --shadow:0 4px 14px rgba(20,24,33,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Inter",-apple-system,Segoe UI,Roboto,sans-serif;
+    background:var(--bg-soft);
+    color:var(--text);
+    font-size:13px;
+    -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input{font-family:inherit;outline:none;border:none;background:none;color:inherit}
+  .num{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
+
+  /* ========= HEADER ========= */
+  .header{
+    height:56px;
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;
+    padding:0 20px;gap:32px;
+    position:sticky;top:0;z-index:50;
+  }
+  .logo{
+    width:32px;height:32px;border-radius:8px;
+    background:linear-gradient(135deg,#ff8a1f,#ff6a00);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-weight:700;font-size:18px;
+    box-shadow:0 2px 6px rgba(255,138,31,.35);
+  }
+  nav.main-nav{display:flex;gap:4px;align-items:center}
+  nav.main-nav button{
+    padding:8px 14px;border-radius:8px;
+    font-weight:500;color:var(--text);font-size:14px;
+    transition:all .15s;
+  }
+  nav.main-nav button:hover{background:var(--bg-soft)}
+  nav.main-nav button.active{color:var(--orange);font-weight:600}
+  .header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+  .search-top{
+    width:280px;height:38px;background:var(--bg-soft);
+    border-radius:10px;display:flex;align-items:center;
+    padding:0 14px;gap:8px;
+    border:1px solid transparent;transition:all .15s;
+  }
+  .search-top:focus-within{border-color:var(--orange);background:#fff}
+  .search-top input{flex:1;font-size:13px}
+  .icon-btn{
+    width:36px;height:36px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);transition:all .15s;position:relative;
+  }
+  .icon-btn:hover{background:var(--bg-soft);color:var(--text)}
+  .icon-btn.lock{color:var(--green);background:var(--green-soft)}
+  .icon-btn .dot{position:absolute;top:8px;right:8px;width:6px;height:6px;border-radius:50%;background:var(--red)}
+
+  /* ========= INDEX CARDS ========= */
+  .indices{
+    display:grid;
+    grid-template-columns:repeat(4,1fr) 1.4fr;
+    gap:12px;padding:14px 16px;
+  }
+  .idx-card{
+    background:#fff;border-radius:12px;padding:12px 14px;
+    border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.02);
+    display:grid;grid-template-columns:1fr 1.1fr;gap:8px;
+  }
+  .idx-left{display:flex;flex-direction:column;gap:2px}
+  .idx-name{font-weight:700;font-size:14px;color:var(--green)}
+  .idx-card.orange .idx-name{color:var(--orange)}
+  .idx-value{font-size:18px;font-weight:700;color:var(--green);display:flex;align-items:center;gap:4px}
+  .idx-card.orange .idx-value{color:var(--orange)}
+  .idx-change{font-size:11px;color:var(--green);font-weight:500}
+  .idx-card.orange .idx-change{color:var(--orange)}
+  .idx-stats{font-size:11px;display:flex;gap:8px;margin-top:2px}
+  .stat-up{color:var(--green)}
+  .stat-flat{color:var(--yellow)}
+  .stat-down{color:var(--red)}
+  .stat-flat::before{content:"●";margin-right:2px}
+  .idx-vol{font-size:11px;color:var(--muted);display:flex;justify-content:space-between;margin-top:4px;border-top:1px dashed var(--border);padding-top:6px}
+  .idx-vol .pill{padding:1px 8px;background:var(--bg-soft);border-radius:6px}
+  .idx-chart{position:relative}
+  .idx-chart svg{width:100%;height:60px}
+  .idx-chart .x-axis{display:flex;justify-content:space-between;font-size:9px;color:var(--muted);margin-top:2px}
+
+  .idx-table{
+    background:#fff;border-radius:12px;border:1px solid var(--border);
+    padding:8px 10px;font-size:11px;overflow:hidden;
+  }
+  .idx-table table{width:100%;border-collapse:collapse}
+  .idx-table th{font-weight:500;color:var(--muted);text-align:right;padding:4px 6px;font-size:10px}
+  .idx-table th:first-child{text-align:left}
+  .idx-table td{padding:4px 6px;text-align:right;font-weight:500}
+  .idx-table td:first-child{text-align:left;font-weight:600;color:var(--text)}
+  .idx-table .arrow{font-size:9px;color:var(--muted);cursor:pointer;padding:0 3px}
+
+  /* ========= FILTER BAR ========= */
+  .filter-bar{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 16px 14px;
+  }
+  .search-stock{
+    flex:0 0 320px;height:42px;background:#fff;
+    border-radius:10px;border:1px solid var(--border);
+    display:flex;align-items:center;padding:0 14px;gap:10px;
+    transition:all .15s;
+  }
+  .search-stock:focus-within{border-color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft)}
+  .search-stock svg{color:var(--muted)}
+  .search-stock input{flex:1;font-size:13px}
+  .filter-btn{
+    height:42px;padding:0 16px;background:#fff;border-radius:10px;
+    border:1px solid var(--border);font-weight:600;font-size:13px;
+    display:flex;align-items:center;gap:8px;transition:all .15s;
+    position:relative;
+  }
+  .filter-btn:hover{border-color:#cfd4dc}
+  .filter-btn.active{background:var(--orange);color:#fff;border-color:var(--orange);box-shadow:0 4px 12px rgba(255,138,31,.3)}
+  .filter-btn svg{transition:transform .2s}
+  .filter-btn.open svg.chev{transform:rotate(180deg)}
+  .filter-spacer{flex:1}
+  .icon-btn-round{
+    width:42px;height:42px;border-radius:10px;background:#fff;
+    border:1px solid var(--border);
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);transition:all .15s;
+  }
+  .icon-btn-round:hover{border-color:#cfd4dc;color:var(--text)}
+  .icon-btn-round.play{color:var(--orange)}
+
+  /* dropdown */
+  .dropdown-wrap{position:relative}
+  .dropdown{
+    position:absolute;top:calc(100% + 8px);left:0;
+    width:340px;background:#fff;border-radius:12px;
+    box-shadow:0 12px 32px rgba(20,24,33,.15);
+    border:1px solid var(--border);
+    padding:14px;z-index:30;
+    display:none;
+  }
+  .dropdown.open{display:block;animation:fadeIn .15s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+  .dropdown-input{
+    display:flex;gap:8px;margin-bottom:14px;
+  }
+  .dropdown-input input{
+    flex:1;height:38px;border:1px solid var(--border);
+    border-radius:8px;padding:0 12px;font-size:13px;
+  }
+  .dropdown-input input:focus{border-color:var(--orange)}
+  .dropdown-input button{
+    width:38px;height:38px;border-radius:8px;
+    background:var(--orange);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:300;
+    box-shadow:0 2px 6px rgba(255,138,31,.35);
+  }
+  .dropdown-list{display:flex;flex-direction:column}
+  .dropdown-item{
+    padding:10px 4px;border-bottom:1px solid var(--bg-soft);
+    cursor:pointer;transition:background .12s;
+    border-radius:6px;
+  }
+  .dropdown-item:hover{background:var(--bg-soft);padding-left:10px}
+  .dropdown-item:last-child{border-bottom:none}
+  .dropdown-item .name{font-weight:600;font-size:14px}
+  .dropdown-item .count{font-size:12px;color:var(--muted);margin-top:2px}
+
+  /* ========= TABLE ========= */
+  .table-wrap{
+    background:#fff;margin:0 16px;border-radius:12px;
+    border:1px solid var(--border);overflow:hidden;
+  }
+  table.price-table{
+    width:100%;border-collapse:collapse;font-size:13px;
+  }
+  table.price-table thead .group-row th{
+    padding:6px 8px;font-weight:500;font-size:12px;
+    border-bottom:1px solid var(--border);
+    background:var(--bg-soft);
+  }
+  .group-buy{color:var(--green)}
+  .group-match{color:var(--orange)}
+  .group-sell{color:var(--red)}
+  .group-foreign{color:var(--muted)}
+  table.price-table thead .head-row th{
+    padding:8px 6px;font-weight:500;font-size:11px;
+    color:var(--muted);background:var(--bg-soft);
+    border-bottom:1px solid var(--border);
+    text-align:right;white-space:nowrap;
+  }
+  table.price-table thead .head-row th.sticky-left{text-align:left;padding-left:14px}
+  th.sortable{cursor:pointer;user-select:none}
+  th.sortable .sort-ico{margin-left:3px;display:inline-flex;flex-direction:column;font-size:7px;color:#bcc2cc;line-height:.9;vertical-align:middle}
+  th.sortable:hover{color:var(--text)}
+  table.price-table tbody td{
+    padding:9px 6px;text-align:right;
+    border-bottom:1px solid var(--bg-soft);
+    font-weight:500;
+  }
+  table.price-table tbody td.code{
+    text-align:left;padding-left:14px;
+    font-weight:700;color:var(--green);
+  }
+  table.price-table tbody tr:hover{background:#fffaf3}
+  .c-ceil{color:var(--purple)}
+  .c-floor{color:var(--blue)}
+  .c-ref{color:var(--yellow)}
+  .c-up{color:var(--green)}
+  .c-down{color:var(--red)}
+  .c-muted{color:var(--text)}
+
+  /* ========= STATUS BAR ========= */
+  .status-bar{
+    height:40px;background:#fff;border-top:1px solid var(--border);
+    display:flex;align-items:center;padding:0 16px;gap:24px;
+    font-size:12px;margin-top:14px;position:sticky;bottom:0;
+  }
+  .status-bar .clock{display:flex;align-items:center;gap:6px;color:var(--muted)}
+  .status-bar .market{color:var(--muted)}
+  .status-bar .market b{color:var(--green);font-weight:700;margin-left:4px}
+  .status-bar .center{margin-left:auto;margin-right:auto;color:var(--muted)}
+  .status-bar .users{display:flex;align-items:center;gap:4px;color:var(--muted)}
+
+  /* ========= ANNOTATION TOGGLE ========= */
+  .anno-toggle{
+    position:fixed;right:18px;bottom:60px;z-index:90;
+    background:#1f2430;color:#fff;
+    padding:10px 16px;border-radius:999px;
+    font-weight:600;font-size:12px;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+    display:flex;align-items:center;gap:8px;
+    transition:transform .15s;
+  }
+  .anno-toggle:hover{transform:translateY(-2px)}
+  .anno-toggle.on{background:var(--orange)}
+
+  /* annotation overlay */
+  body.show-anno [data-action]{position:relative}
+  body.show-anno [data-action]::after{
+    content:attr(data-action);
+    position:absolute;top:-8px;left:50%;transform:translateX(-50%);
+    background:var(--orange);color:#fff;
+    font-size:9px;font-weight:700;
+    padding:2px 6px;border-radius:4px;
+    white-space:nowrap;pointer-events:none;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
+    z-index:60;
+  }
+  body.show-anno [data-action]{outline:1.5px dashed var(--orange);outline-offset:2px;border-radius:4px}
+
+  /* responsive */
+  @media (max-width:1400px){
+    .indices{grid-template-columns:repeat(2,1fr);}
+    .indices .idx-table{grid-column:span 2}
+  }
+  @media (max-width:768px){
+    .indices{grid-template-columns:1fr}
+    .indices .idx-table{grid-column:span 1}
+    nav.main-nav{display:none}
+    .search-top{width:160px}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="header">
+  <div class="logo" data-action="Logo">S</div>
+  <nav class="main-nav">
+    <button class="active" data-action="Bảng giá">Bảng giá</button>
+    <button onclick="location.href='index.html'" data-action="Thị trường">Thị trường</button>
+    <button data-action="Giao dịch">Giao dịch</button>
+    <button data-action="Tài sản">Tài sản</button>
+    <button data-action="Tài khoản">Tài khoản</button>
+    <button data-action="Báo cáo">Báo cáo</button>
+  </nav>
+  <div class="header-right">
+    <div class="search-top" data-action="Tìm kiếm chung">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input placeholder="Tìm kiếm" />
+    </div>
+    <button class="icon-btn" data-action="Thông báo">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      <span class="dot"></span>
+    </button>
+    <button class="icon-btn" data-action="Cài đặt">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button class="icon-btn lock" data-action="Bảo mật">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </button>
+    <button class="icon-btn" data-action="Tài khoản">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+    <button class="icon-btn" data-action="Đăng xuất">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- ============ INDEX CARDS ============ -->
+<section class="indices">
+  <!-- Card 1 (green VN-Index) -->
+  <div class="idx-card" data-action="Chỉ số VN-Index">
+    <div class="idx-left">
+      <div class="idx-name">VN-Index</div>
+      <div class="idx-value">↑ 1932.47</div>
+      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-stats">
+        <span class="stat-up">↑ 32 (7)</span>
+        <span class="stat-flat">80</span>
+        <span class="stat-down">↓ 47 (23)</span>
+      </div>
+      <div class="idx-vol">
+        <span class="pill">9,018,510 CP</span>
+        <span class="pill">239,018,510 Tỷ</span>
+        <span class="pill">Phiên ATO</span>
+      </div>
+    </div>
+    <div class="idx-chart">
+      <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gradG" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#1ec78b" stop-opacity=".3"/>
+            <stop offset="100%" stop-color="#1ec78b" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,20 L20,15 L35,28 L50,22 L65,35 L80,30 L95,40 L110,28 L130,32 L150,20 L170,28 L190,18 L200,15 L200,60 L0,60 Z" fill="url(#gradG)"/>
+        <path d="M0,20 L20,15 L35,28 L50,22 L65,35 L80,30 L95,40 L110,28 L130,32 L150,20 L170,28 L190,18 L200,15" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
+        <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+  </div>
+
+  <!-- Card 2 (orange) -->
+  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+    <div class="idx-left">
+      <div class="idx-name">VN-Index</div>
+      <div class="idx-value">↑ 1932.47</div>
+      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-stats">
+        <span class="stat-up">↑ 32 (7)</span>
+        <span class="stat-flat">80</span>
+        <span class="stat-down">↓ 47 (23)</span>
+      </div>
+      <div class="idx-vol">
+        <span class="pill">9,018,510 CP</span>
+        <span class="pill">239,018,510 Tỷ</span>
+        <span class="pill">Phiên ATO</span>
+      </div>
+    </div>
+    <div class="idx-chart">
+      <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gradO" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#1ec78b" stop-opacity=".3"/>
+            <stop offset="100%" stop-color="#1ec78b" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,18 L18,22 L35,15 L52,28 L70,25 L88,38 L106,30 L124,42 L142,28 L160,32 L178,20 L195,25 L200,18 L200,60 L0,60 Z" fill="url(#gradO)"/>
+        <path d="M0,18 L18,22 L35,15 L52,28 L70,25 L88,38 L106,30 L124,42 L142,28 L160,32 L178,20 L195,25 L200,18" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
+        <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+    <div class="idx-left">
+      <div class="idx-name">VN-Index</div>
+      <div class="idx-value">↑ 1932.47</div>
+      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-stats">
+        <span class="stat-up">↑ 32 (7)</span>
+        <span class="stat-flat">80</span>
+        <span class="stat-down">↓ 47 (23)</span>
+      </div>
+      <div class="idx-vol">
+        <span class="pill">9,018,510 CP</span>
+        <span class="pill">239,018,510 Tỷ</span>
+        <span class="pill">Phiên ATO</span>
+      </div>
+    </div>
+    <div class="idx-chart">
+      <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+        <path d="M0,22 L22,18 L40,30 L58,24 L76,36 L94,28 L112,42 L130,30 L148,38 L166,22 L184,30 L200,20 L200,60 L0,60 Z" fill="url(#gradG)"/>
+        <path d="M0,22 L22,18 L40,30 L58,24 L76,36 L94,28 L112,42 L130,30 L148,38 L166,22 L184,30 L200,20" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
+        <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+  </div>
+
+  <!-- Card 4 -->
+  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+    <div class="idx-left">
+      <div class="idx-name">VN-Index</div>
+      <div class="idx-value">↑ 1932.47</div>
+      <div class="idx-change">(7.23  0.95%)</div>
+      <div class="idx-stats">
+        <span class="stat-up">↑ 32 (7)</span>
+        <span class="stat-flat">80</span>
+        <span class="stat-down">↓ 47 (23)</span>
+      </div>
+      <div class="idx-vol">
+        <span class="pill">9,018,510 CP</span>
+        <span class="pill">239,018,510 Tỷ</span>
+        <span class="pill">Phiên ATO</span>
+      </div>
+    </div>
+    <div class="idx-chart">
+      <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+        <path d="M0,25 L20,20 L40,32 L60,26 L80,38 L100,30 L120,40 L140,28 L160,34 L180,22 L200,16 L200,60 L0,60 Z" fill="url(#gradG)"/>
+        <path d="M0,25 L20,20 L40,32 L60,26 L80,38 L100,30 L120,40 L140,28 L160,34 L180,22 L200,16" stroke="#1ec78b" stroke-width="1.5" fill="none"/>
+        <line x1="0" y1="32" x2="200" y2="32" stroke="#bcc2cc" stroke-width=".5" stroke-dasharray="2 2"/>
+      </svg>
+      <div class="x-axis"><span>9h</span><span>11h</span><span>13h</span><span>15h</span></div>
+    </div>
+  </div>
+
+  <!-- Right: index table -->
+  <div class="idx-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Chỉ số</th>
+          <th>Điểm</th>
+          <th>
+            <span class="arrow" data-action="Prev">‹</span>%<span class="arrow" data-action="Next">›</span>
+          </th>
+          <th>KLGD<br/>(triệu)</th>
+          <th>GTGD (tỷ)</th>
+          <th>GTGD (tỷ)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>VNXALLSHARE</td>
+          <td class="num c-up">2.094,57</td>
+          <td class="num c-up">0,35%</td>
+          <td class="num">1.046,83</td>
+          <td class="num">28.508,19</td>
+          <td class="num">17,546,092</td>
+        </tr>
+        <tr>
+          <td>VN100</td>
+          <td class="num c-up">1.299,88</td>
+          <td class="num c-up">0,29%</td>
+          <td class="num">810,52</td>
+          <td class="num">24.211,97</td>
+          <td class="num">17,546,092</td>
+        </tr>
+        <tr>
+          <td>VNDIAMOND</td>
+          <td class="num c-up">1.532,27</td>
+          <td class="num c-up">0,48%</td>
+          <td class="num">128,67</td>
+          <td class="num">2.099,41</td>
+          <td class="num">17,546,092</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ FILTER BAR ============ -->
+<div class="filter-bar">
+  <div class="search-stock" data-action="Tìm/Thêm mã">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input id="searchStock" placeholder="Tìm kiếm mã chứng khoán" />
+  </div>
+
+  <div class="dropdown-wrap">
+    <button class="filter-btn" id="favBtn" data-action="Mở danh mục">
+      Danh mục ưa thích
+      <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="dropdown" id="favDropdown">
+      <div class="dropdown-input">
+        <input placeholder="Nhập tên và tạo danh mục mới" />
+        <button data-action="Tạo danh mục">+</button>
+      </div>
+      <div class="dropdown-list">
+        <div class="dropdown-item" data-action="Chọn danh mục">
+          <div class="name">Danh mục theo dõi 1</div>
+          <div class="count">15 mã</div>
+        </div>
+        <div class="dropdown-item" data-action="Chọn danh mục">
+          <div class="name">Danh mục theo dõi 1</div>
+          <div class="count">15 mã</div>
+        </div>
+        <div class="dropdown-item" data-action="Chọn danh mục">
+          <div class="name">Danh mục theo dõi 1</div>
+          <div class="count">15 mã</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="filter-btn active" data-action="Lọc VN30">
+    VN30
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Lọc HNX">
+    HNX
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Lọc UPCOM">
+    UPCOM
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Lọc theo ngành">
+    Ngành
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Phái sinh">
+    Phái sinh
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Chứng quyền">
+    Chứng quyền
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <button class="filter-btn" data-action="Khuyến nghị">
+    Khuyến nghị
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+
+  <div class="filter-spacer"></div>
+
+  <button class="icon-btn-round play" data-action="Tự động cập nhật">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+  </button>
+  <button class="icon-btn-round" data-action="Lên đầu trang">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+  </button>
+</div>
+
+<!-- ============ PRICE TABLE ============ -->
+<div class="table-wrap">
+<table class="price-table">
+  <thead>
+    <tr class="group-row">
+      <th colspan="4"></th>
+      <th colspan="6" class="group-buy">Bên mua</th>
+      <th colspan="4" class="group-match">Khớp lệnh</th>
+      <th colspan="6" class="group-sell">Bên bán</th>
+      <th colspan="4"></th>
+      <th colspan="2" class="group-foreign">ĐTNN</th>
+    </tr>
+    <tr class="head-row">
+      <th class="sticky-left">Mã GD</th>
+      <th>Trần</th>
+      <th>Sàn</th>
+      <th>TC</th>
+      <th>Giá 3</th>
+      <th>KL 3</th>
+      <th>Giá 2</th>
+      <th>KL 2</th>
+      <th>Giá 1</th>
+      <th>KL 1</th>
+      <th>Giá</th>
+      <th>+/-</th>
+      <th>%</th>
+      <th>KLGD</th>
+      <th>Giá 3</th>
+      <th>KL 3</th>
+      <th>Giá 2</th>
+      <th>KL 2</th>
+      <th>Giá 1</th>
+      <th>KL 1</th>
+      <th class="sortable" data-action="Sắp xếp">Cao <span class="sort-ico">▲▼</span></th>
+      <th class="sortable" data-action="Sắp xếp">Thấp <span class="sort-ico">▲▼</span></th>
+      <th class="sortable" data-action="Sắp xếp">TB <span class="sort-ico">▲▼</span></th>
+      <th class="sortable" data-action="Sắp xếp">Tổng KL <span class="sort-ico">▲▼</span></th>
+      <th class="sortable" data-action="Sắp xếp">Mua <span class="sort-ico">▲▼</span></th>
+      <th class="sortable" data-action="Sắp xếp">Bán <span class="sort-ico">▲▼</span></th>
+    </tr>
+  </thead>
+  <tbody id="tbody"></tbody>
+</table>
+</div>
+
+<!-- ============ STATUS BAR ============ -->
+<footer class="status-bar">
+  <div class="clock" data-action="Đồng hồ">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    <span class="num">09:20:45 | 28/02/2023</span>
+  </div>
+  <div class="market" data-action="Trạng thái HOSE">HOSE: <b>LO</b></div>
+  <div class="market" data-action="Trạng thái HNX">HNX <b>LO</b></div>
+  <div class="market" data-action="Trạng thái UPCOM">UPCOM <b>LO</b></div>
+  <div class="market" data-action="Trạng thái phái sinh">Phái sinh <b>LO</b></div>
+  <div class="center">Giá x 1,000 VND. Số Lượng x 1000</div>
+  <div class="users" data-action="Người dùng online">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    1.183
+  </div>
+</footer>
+
+<!-- annotation toggle -->
+<button class="anno-toggle" id="annoBtn">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+  <span id="annoLabel">Hiện các action</span>
+</button>
+
+<script>
+  // generate 8 rows
+  const tbody = document.getElementById('tbody');
+  const row = `
+    <tr>
+      <td class="code" data-action="Mở chi tiết mã">SHS</td>
+      <td class="num c-ceil">29,45</td>
+      <td class="num c-floor">25,65</td>
+      <td class="num c-ref">27,55</td>
+      <td class="num c-up">27,60</td>
+      <td class="num c-up">239.200</td>
+      <td class="num c-up">27,65</td>
+      <td class="num c-up">89.100</td>
+      <td class="num c-up">27,70</td>
+      <td class="num c-up">53.400</td>
+      <td class="num c-up">27,70</td>
+      <td class="num c-up">+0,15</td>
+      <td class="num c-up">+0,54%</td>
+      <td class="num c-up">100.000</td>
+      <td class="num c-up">27,75</td>
+      <td class="num c-up">19.200</td>
+      <td class="num c-up">27,80</td>
+      <td class="num c-up">236.200</td>
+      <td class="num c-up">27,85</td>
+      <td class="num c-up">136.900</td>
+      <td class="num c-up">27,90</td>
+      <td class="num c-down">27,40</td>
+      <td class="num c-muted">27,62</td>
+      <td class="num c-muted">27,623,000</td>
+      <td class="num c-muted">100.000</td>
+      <td class="num c-muted">100.000</td>
+    </tr>`;
+  tbody.innerHTML = row.repeat(8);
+
+  // dropdown
+  const favBtn = document.getElementById('favBtn');
+  const favDropdown = document.getElementById('favDropdown');
+  favBtn.addEventListener('click', e=>{
+    e.stopPropagation();
+    favDropdown.classList.toggle('open');
+    favBtn.classList.toggle('open');
+    favBtn.classList.toggle('active');
+    // change placeholder when fav category active (state from image 2)
+    const inp = document.getElementById('searchStock');
+    if(favBtn.classList.contains('active')){
+      inp.placeholder = 'Thêm mã vào danh mục';
+    }else{
+      inp.placeholder = 'Tìm kiếm mã chứng khoán';
+    }
+  });
+  document.addEventListener('click', ()=>{
+    favDropdown.classList.remove('open');
+    favBtn.classList.remove('open');
+  });
+  favDropdown.addEventListener('click', e=>e.stopPropagation());
+
+  // annotation toggle
+  const annoBtn = document.getElementById('annoBtn');
+  const annoLabel = document.getElementById('annoLabel');
+  annoBtn.addEventListener('click', ()=>{
+    document.body.classList.toggle('show-anno');
+    const on = document.body.classList.contains('show-anno');
+    annoBtn.classList.toggle('on', on);
+    annoLabel.textContent = on ? 'Ẩn các action' : 'Hiện các action';
+  });
+</script>
+
+</body>
+</html>
