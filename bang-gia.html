@@ -120,8 +120,12 @@
   .idx-left{display:flex;flex-direction:column;gap:2px}
   .idx-name{font-weight:700;font-size:14px;color:var(--green)}
   .idx-card.orange .idx-name{color:var(--orange)}
-  .idx-value{font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:4px}
-  .idx-change{font-size:11px;color:var(--text);font-weight:500}
+  .idx-value{font-size:18px;font-weight:700;display:flex;align-items:center;gap:4px}
+  .idx-change{font-size:11px;font-weight:500}
+  /* Màu giá trị / change theo trạng thái: tăng=xanh, giảm=đỏ, tham chiếu=vàng */
+  .idx-card.up .idx-value,   .idx-card.up .idx-change   {color:var(--green)}
+  .idx-card.down .idx-value, .idx-card.down .idx-change {color:var(--red)}
+  .idx-card.ref .idx-value,  .idx-card.ref .idx-change  {color:var(--yellow)}
   .idx-stats{font-size:11px;display:flex;gap:8px;margin-top:2px;flex-wrap:nowrap}
   .idx-stats span{white-space:nowrap}
   .stat-up{color:var(--green)}
@@ -140,8 +144,24 @@
 
   .idx-table{
     background:#fff;border-radius:12px;border:1px solid var(--border);
-    padding:6px 10px;font-size:11px;overflow:hidden;
+    padding:0;font-size:11px;overflow:hidden;
+    display:flex;flex-direction:column;
   }
+  .idx-tabs{
+    display:flex;gap:2px;
+    border-bottom:1px solid var(--border);
+    padding:4px 8px 0;
+  }
+  .idx-tab{
+    padding:6px 10px;font-size:12px;font-weight:500;
+    color:var(--muted);cursor:pointer;
+    border-bottom:2px solid transparent;
+    margin-bottom:-1px;transition:all .15s;
+    white-space:nowrap;
+  }
+  .idx-tab:hover{color:var(--text)}
+  .idx-tab.active{color:var(--orange);border-bottom-color:var(--orange);font-weight:600}
+  .idx-table-body{padding:4px 10px 6px;flex:1;overflow:hidden}
   .idx-table table{width:100%;border-collapse:collapse;table-layout:fixed}
   .idx-table th{font-weight:500;color:var(--muted);text-align:right;padding:3px 4px;font-size:10px;white-space:nowrap}
   .idx-table th:first-child{text-align:left}
@@ -362,7 +382,7 @@
 <!-- ============ INDEX CARDS ============ -->
 <section class="indices">
   <!-- Card 1 (green VN-Index) -->
-  <div class="idx-card" data-action="Chỉ số VN-Index">
+  <div class="idx-card up" data-action="Chỉ số VN-Index">
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
@@ -394,7 +414,7 @@
   </div>
 
   <!-- Card 2 (orange) -->
-  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
@@ -426,7 +446,7 @@
   </div>
 
   <!-- Card 3 -->
-  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
@@ -452,7 +472,7 @@
   </div>
 
   <!-- Card 4 -->
-  <div class="idx-card orange" data-action="Chỉ số VN-Index">
+  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
       <div class="idx-value">↑ 1932.47</div>
@@ -477,48 +497,30 @@
     </div>
   </div>
 
-  <!-- Right: index table -->
+  <!-- Right: index table with tabs -->
   <div class="idx-table">
-    <table>
-      <thead>
-        <tr>
-          <th>Chỉ số</th>
-          <th>Điểm</th>
-          <th>
-            <span class="arrow" data-action="Prev">‹</span>%<span class="arrow" data-action="Next">›</span>
-          </th>
-          <th>KLGD<br/>(triệu)</th>
-          <th>GTGD (tỷ)</th>
-          <th>GTGD (tỷ)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>VNXALLSHARE</td>
-          <td class="num c-up">2.094,57</td>
-          <td class="num c-up">0,35%</td>
-          <td class="num">1.046,83</td>
-          <td class="num">28.508,19</td>
-          <td class="num">17,546,092</td>
-        </tr>
-        <tr>
-          <td>VN100</td>
-          <td class="num c-up">1.299,88</td>
-          <td class="num c-up">0,29%</td>
-          <td class="num">810,52</td>
-          <td class="num">24.211,97</td>
-          <td class="num">17,546,092</td>
-        </tr>
-        <tr>
-          <td>VNDIAMOND</td>
-          <td class="num c-up">1.532,27</td>
-          <td class="num c-up">0,48%</td>
-          <td class="num">128,67</td>
-          <td class="num">2.099,41</td>
-          <td class="num">17,546,092</td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="idx-tabs" id="idxTabs">
+      <button class="idx-tab active" data-tab="vn" data-action="Tab Việt Nam">Việt Nam</button>
+      <button class="idx-tab" data-tab="world" data-action="Tab Thế giới">Thế giới</button>
+      <button class="idx-tab" data-tab="commodity" data-action="Tab Hàng hóa">Hàng hóa</button>
+      <button class="idx-tab" data-tab="other" data-action="Tab Khác">Khác</button>
+    </div>
+    <div class="idx-table-body">
+      <table>
+        <thead>
+          <tr>
+            <th>Chỉ số</th>
+            <th>Giá</th>
+            <th>
+              <span class="arrow" data-action="Prev">‹</span>+/-<span class="arrow" data-action="Next">›</span>
+            </th>
+            <th>KL</th>
+            <th>GTGD<br/>(tỷ)</th>
+          </tr>
+        </thead>
+        <tbody id="idxTableBody"></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
@@ -670,6 +672,64 @@
 </div>
 
 <script>
+  /* ============== SECONDARY INDEX TABLE — 4 tabs ============== */
+  const idxTabsData = {
+    vn: [
+      { code:'VN100',       price:1952.92, change: 8.45, vol:137175301, gtgd:3739 },
+      { code:'VNXALLSHARE', price:3031.82, change:11.66, vol:153446160, gtgd:3982 },
+      { code:'VNDIAMOND',   price:2501.52, change: 2.21, vol:18201789,  gtgd:64 }
+    ],
+    world: [
+      { code:'DOW JONES',   price:38671.69, change: 56.76, vol:0, gtgd:0 },
+      { code:'NASDAQ',      price:16349.25, change:-12.34, vol:0, gtgd:0 },
+      { code:'S&P 500',     price: 5119.71, change:  9.96, vol:0, gtgd:0 },
+      { code:'NIKKEI 225',  price:39910.82, change:-50.16, vol:0, gtgd:0 }
+    ],
+    commodity: [
+      { code:'DẦU BRENT',   price: 83.21, change: 0.45, vol:0, gtgd:0 },
+      { code:'VÀNG (USD/oz)', price:2046.30, change: 5.12, vol:0, gtgd:0 },
+      { code:'BẠC',         price: 24.83, change:-0.12, vol:0, gtgd:0 },
+      { code:'ĐỒNG',        price:  3.89, change: 0.03, vol:0, gtgd:0 }
+    ],
+    other: [
+      { code:'USD/VND',     price:24520, change:  20, vol:0, gtgd:0 },
+      { code:'EUR/VND',     price:26870, change: -45, vol:0, gtgd:0 },
+      { code:'BTC/USD',     price:67420, change:1230, vol:0, gtgd:0 },
+      { code:'ETH/USD',     price: 3485, change: -42, vol:0, gtgd:0 }
+    ]
+  };
+
+  function fmtIdxNum(n, dec){
+    return n.toLocaleString('vi-VN', {minimumFractionDigits:dec, maximumFractionDigits:dec});
+  }
+  function fmtIdxVol(v){ return v ? v.toLocaleString('vi-VN') : '—'; }
+
+  function renderIdxTable(tab){
+    const data = idxTabsData[tab] || [];
+    const tbody = document.getElementById('idxTableBody');
+    tbody.innerHTML = data.map(r => {
+      const cls = r.change > 0 ? 'c-up' : r.change < 0 ? 'c-down' : 'c-ref';
+      const sign = r.change > 0 ? '+' : '';
+      const dec = r.price >= 1000 ? 2 : 2;
+      return `<tr>
+        <td class="${cls}">${r.code}</td>
+        <td class="num ${cls}">${fmtIdxNum(r.price, dec)}</td>
+        <td class="num ${cls}">${sign}${fmtIdxNum(r.change, 2)}</td>
+        <td class="num">${fmtIdxVol(r.vol)}</td>
+        <td class="num">${fmtIdxVol(r.gtgd)}</td>
+      </tr>`;
+    }).join('');
+  }
+
+  document.querySelectorAll('#idxTabs .idx-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('#idxTabs .idx-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      renderIdxTable(t.dataset.tab);
+    });
+  });
+  renderIdxTable('vn');
+
   /* ============== PRICE TABLE ROWS — đúng quy luật màu chứng khoán VN ============== */
   /* Trần=tím, Sàn=xanh dương, TC=vàng, Tăng=xanh lá, Giảm=đỏ
      Bước giá: HOSE 10K-50K → 50đ (0,05); HOSE ≥50K → 100đ (0,10); HNX → 100đ (0,10) */
