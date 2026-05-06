@@ -126,6 +126,11 @@
   .idx-card.up .idx-value,   .idx-card.up .idx-change   {color:var(--green)}
   .idx-card.down .idx-value, .idx-card.down .idx-change {color:var(--red)}
   .idx-card.ref .idx-value,  .idx-card.ref .idx-change  {color:var(--yellow)}
+  /* Mini chart đổi màu theo trạng thái */
+  .idx-card.down .idx-chart svg path[stroke]{stroke:var(--red)}
+  .idx-card.down .idx-chart svg path[fill^="url"]{fill:rgba(239,70,70,.18)}
+  .idx-card.ref  .idx-chart svg path[stroke]{stroke:var(--yellow)}
+  .idx-card.ref  .idx-chart svg path[fill^="url"]{fill:rgba(245,179,0,.18)}
   .idx-stats{font-size:11px;display:flex;gap:8px;margin-top:2px;flex-wrap:nowrap}
   .idx-stats span{white-space:nowrap}
   .stat-up{color:var(--green)}
@@ -381,16 +386,16 @@
 
 <!-- ============ INDEX CARDS ============ -->
 <section class="indices">
-  <!-- Card 1 (green VN-Index) -->
+  <!-- Card 1: VN-Index — TĂNG (xanh) -->
   <div class="idx-card up" data-action="Chỉ số VN-Index">
     <div class="idx-left">
       <div class="idx-name">VN-Index</div>
-      <div class="idx-value">↑ 1932.47</div>
+      <div class="idx-value">↑ 1.932,47</div>
       <div class="idx-change">+7,23 (+0,95%)</div>
       <div class="idx-stats">
-        <span class="stat-up">↑ 32 (7)</span>
+        <span class="stat-up">↑ 220 (50)</span>
         <span class="stat-flat">80</span>
-        <span class="stat-down">↓ 47 (23)</span>
+        <span class="stat-down">↓ 145 (30)</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -413,16 +418,16 @@
     </div>
   </div>
 
-  <!-- Card 2 (orange) -->
-  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
+  <!-- Card 2: VN30 — GIẢM (đỏ) -->
+  <div class="idx-card orange down" data-action="Chỉ số VN30">
     <div class="idx-left">
-      <div class="idx-name">VN-Index</div>
-      <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">+7,23 (+0,95%)</div>
+      <div class="idx-name">VN30</div>
+      <div class="idx-value">↓ 1.845,32</div>
+      <div class="idx-change">-8,76 (-0,47%)</div>
       <div class="idx-stats">
-        <span class="stat-up">↑ 32 (7)</span>
-        <span class="stat-flat">80</span>
-        <span class="stat-down">↓ 47 (23)</span>
+        <span class="stat-up">↑ 8 (2)</span>
+        <span class="stat-flat">5</span>
+        <span class="stat-down">↓ 17 (5)</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -445,16 +450,16 @@
     </div>
   </div>
 
-  <!-- Card 3 -->
-  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
+  <!-- Card 3: HNX — THAM CHIẾU (vàng) -->
+  <div class="idx-card orange ref" data-action="Chỉ số HNX">
     <div class="idx-left">
-      <div class="idx-name">VN-Index</div>
-      <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">+7,23 (+0,95%)</div>
+      <div class="idx-name">HNX</div>
+      <div class="idx-value">— 234,56</div>
+      <div class="idx-change">0,00 (0,00%)</div>
       <div class="idx-stats">
-        <span class="stat-up">↑ 32 (7)</span>
-        <span class="stat-flat">80</span>
-        <span class="stat-down">↓ 47 (23)</span>
+        <span class="stat-up">↑ 95 (20)</span>
+        <span class="stat-flat">250</span>
+        <span class="stat-down">↓ 90 (15)</span>
       </div>
     </div>
     <div class="idx-chart">
@@ -471,16 +476,16 @@
     </div>
   </div>
 
-  <!-- Card 4 -->
-  <div class="idx-card orange up" data-action="Chỉ số VN-Index">
+  <!-- Card 4: UPCOM — TĂNG (xanh) -->
+  <div class="idx-card orange up" data-action="Chỉ số UPCOM">
     <div class="idx-left">
-      <div class="idx-name">VN-Index</div>
-      <div class="idx-value">↑ 1932.47</div>
-      <div class="idx-change">+7,23 (+0,95%)</div>
+      <div class="idx-name">UPCOM</div>
+      <div class="idx-value">↑ 95,42</div>
+      <div class="idx-change">+0,33 (+0,35%)</div>
       <div class="idx-stats">
-        <span class="stat-up">↑ 32 (7)</span>
-        <span class="stat-flat">80</span>
-        <span class="stat-down">↓ 47 (23)</span>
+        <span class="stat-up">↑ 145 (35)</span>
+        <span class="stat-flat">320</span>
+        <span class="stat-down">↓ 95 (20)</span>
       </div>
     </div>
     <div class="idx-chart">
