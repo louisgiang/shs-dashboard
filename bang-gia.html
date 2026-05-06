@@ -109,13 +109,13 @@
   /* ========= INDEX CARDS ========= */
   .indices{
     display:grid;
-    grid-template-columns:repeat(4,1fr) 1.4fr;
-    gap:12px;padding:14px 16px;
+    grid-template-columns:repeat(4,1fr) 1.8fr;
+    gap:10px;padding:12px 16px;
   }
   .idx-card{
-    background:#fff;border-radius:12px;padding:12px 14px;
+    background:#fff;border-radius:12px;padding:10px 12px;
     border:1px solid var(--border);box-shadow:0 1px 2px rgba(0,0,0,.02);
-    display:grid;grid-template-columns:1fr 1.1fr;gap:8px;
+    display:grid;grid-template-columns:1.2fr 1fr;gap:8px;
   }
   .idx-left{display:flex;flex-direction:column;gap:2px}
   .idx-name{font-weight:700;font-size:14px;color:var(--green)}
@@ -137,16 +137,16 @@
   }
   .idx-vol .pill{padding:2px 8px;background:var(--bg-soft);border-radius:6px;white-space:nowrap}
   .idx-chart{position:relative;display:flex;align-items:center;justify-content:center}
-  .idx-chart svg{width:100%;height:78px}
+  .idx-chart svg{width:100%;height:52px}
 
   .idx-table{
     background:#fff;border-radius:12px;border:1px solid var(--border);
-    padding:8px 10px;font-size:11px;overflow:hidden;
+    padding:6px 10px;font-size:11px;overflow:hidden;
   }
-  .idx-table table{width:100%;border-collapse:collapse}
-  .idx-table th{font-weight:500;color:var(--muted);text-align:right;padding:4px 6px;font-size:10px}
+  .idx-table table{width:100%;border-collapse:collapse;table-layout:fixed}
+  .idx-table th{font-weight:500;color:var(--muted);text-align:right;padding:3px 4px;font-size:10px;white-space:nowrap}
   .idx-table th:first-child{text-align:left}
-  .idx-table td{padding:4px 6px;text-align:right;font-weight:500}
+  .idx-table td{padding:3px 4px;text-align:right;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .idx-table td:first-child{text-align:left;font-weight:600;color:var(--text)}
   .idx-table .arrow{font-size:9px;color:var(--muted);cursor:pointer;padding:0 3px}
 
