@@ -34,7 +34,9 @@
     color:var(--text);
     font-size:13px;
     -webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100vh;
   }
+  .table-wrap{flex:1 0 auto}
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   input{font-family:inherit;outline:none;border:none;background:none;color:inherit}
   .num{font-family:"JetBrains Mono",monospace;font-variant-numeric:tabular-nums}
@@ -184,14 +186,52 @@
   }
   .dropdown-list{display:flex;flex-direction:column}
   .dropdown-item{
-    padding:10px 4px;border-bottom:1px solid var(--bg-soft);
-    cursor:pointer;transition:background .12s;
+    padding:8px 8px;border-bottom:1px solid var(--bg-soft);
+    transition:background .12s;
     border-radius:6px;
+    display:flex;align-items:center;gap:8px;
   }
-  .dropdown-item:hover{background:var(--bg-soft);padding-left:10px}
+  .dropdown-item:hover{background:var(--bg-soft)}
   .dropdown-item:last-child{border-bottom:none}
+  .dropdown-item.selected{background:var(--orange-soft)}
+  .dropdown-item.selected .name{color:var(--orange)}
+  .dropdown-item .cat-info{flex:1;cursor:pointer;min-width:0}
   .dropdown-item .name{font-weight:600;font-size:14px}
   .dropdown-item .count{font-size:12px;color:var(--muted);margin-top:2px}
+  .dropdown-item .cat-actions{display:flex;gap:2px;opacity:0;transition:opacity .12s}
+  .dropdown-item:hover .cat-actions,
+  .dropdown-item.selected .cat-actions{opacity:1}
+  .cat-act{
+    width:28px;height:28px;border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);transition:all .12s;
+  }
+  .cat-act:hover{background:#fff;color:var(--text)}
+  .cat-act.cat-delete:hover{color:var(--red);background:var(--red-soft)}
+
+  /* ========= MODAL ========= */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(20,24,33,.45);
+    display:none;align-items:center;justify-content:center;
+    z-index:200;
+  }
+  .modal-overlay.open{display:flex;animation:fadeIn .15s ease}
+  .modal{
+    background:#fff;border-radius:14px;padding:22px 24px;
+    width:380px;max-width:90vw;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+  }
+  .modal-title{font-weight:700;font-size:16px;margin-bottom:8px}
+  .modal-body{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:20px}
+  .modal-actions{display:flex;justify-content:flex-end;gap:8px}
+  .btn-modal{
+    height:38px;padding:0 18px;border-radius:8px;
+    font-weight:600;font-size:13px;transition:all .12s;
+  }
+  .btn-cancel{background:var(--bg-soft);color:var(--text)}
+  .btn-cancel:hover{background:#eef0f3}
+  .btn-danger{background:var(--red);color:#fff;box-shadow:0 2px 6px rgba(239,70,70,.35)}
+  .btn-danger:hover{background:#d63b3b}
 
   /* ========= TABLE ========= */
   .table-wrap{
@@ -241,40 +281,13 @@
   .status-bar{
     height:40px;background:#fff;border-top:1px solid var(--border);
     display:flex;align-items:center;padding:0 16px;gap:24px;
-    font-size:12px;margin-top:14px;position:sticky;bottom:0;
+    font-size:12px;margin-top:14px;flex-shrink:0;
   }
   .status-bar .clock{display:flex;align-items:center;gap:6px;color:var(--muted)}
   .status-bar .market{color:var(--muted)}
   .status-bar .market b{color:var(--green);font-weight:700;margin-left:4px}
   .status-bar .center{margin-left:auto;margin-right:auto;color:var(--muted)}
   .status-bar .users{display:flex;align-items:center;gap:4px;color:var(--muted)}
-
-  /* ========= ANNOTATION TOGGLE ========= */
-  .anno-toggle{
-    position:fixed;right:18px;bottom:60px;z-index:90;
-    background:#1f2430;color:#fff;
-    padding:10px 16px;border-radius:999px;
-    font-weight:600;font-size:12px;
-    box-shadow:0 8px 24px rgba(0,0,0,.25);
-    display:flex;align-items:center;gap:8px;
-    transition:transform .15s;
-  }
-  .anno-toggle:hover{transform:translateY(-2px)}
-  .anno-toggle.on{background:var(--orange)}
-
-  /* annotation overlay */
-  body.show-anno [data-action]{position:relative}
-  body.show-anno [data-action]::after{
-    content:attr(data-action);
-    position:absolute;top:-8px;left:50%;transform:translateX(-50%);
-    background:var(--orange);color:#fff;
-    font-size:9px;font-weight:700;
-    padding:2px 6px;border-radius:4px;
-    white-space:nowrap;pointer-events:none;
-    box-shadow:0 2px 6px rgba(0,0,0,.2);
-    z-index:60;
-  }
-  body.show-anno [data-action]{outline:1.5px dashed var(--orange);outline-offset:2px;border-radius:4px}
 
   /* responsive */
   @media (max-width:1400px){
@@ -507,23 +520,10 @@
     </button>
     <div class="dropdown" id="favDropdown">
       <div class="dropdown-input">
-        <input placeholder="Nhập tên và tạo danh mục mới" />
-        <button data-action="Tạo danh mục">+</button>
+        <input id="newCatName" placeholder="Nhập tên và tạo danh mục mới" />
+        <button id="addCatBtn" title="Tạo danh mục">+</button>
       </div>
-      <div class="dropdown-list">
-        <div class="dropdown-item" data-action="Chọn danh mục">
-          <div class="name">Danh mục theo dõi 1</div>
-          <div class="count">15 mã</div>
-        </div>
-        <div class="dropdown-item" data-action="Chọn danh mục">
-          <div class="name">Danh mục theo dõi 1</div>
-          <div class="count">15 mã</div>
-        </div>
-        <div class="dropdown-item" data-action="Chọn danh mục">
-          <div class="name">Danh mục theo dõi 1</div>
-          <div class="count">15 mã</div>
-        </div>
-      </div>
+      <div class="dropdown-list" id="catList"></div>
     </div>
   </div>
 
@@ -628,14 +628,20 @@
   </div>
 </footer>
 
-<!-- annotation toggle -->
-<button class="anno-toggle" id="annoBtn">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-  <span id="annoLabel">Hiện các action</span>
-</button>
+<!-- ============ CONFIRM DELETE MODAL ============ -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-title">Xác nhận xóa danh mục</div>
+    <div class="modal-body">Bạn có chắc muốn xóa danh mục "<span id="confirmCatName"></span>"? Hành động này không thể hoàn tác.</div>
+    <div class="modal-actions">
+      <button class="btn-modal btn-cancel" id="confirmCancel">Hủy</button>
+      <button class="btn-modal btn-danger" id="confirmOk">Xóa</button>
+    </div>
+  </div>
+</div>
 
 <script>
-  // generate 8 rows
+  /* ============== PRICE TABLE ROWS ============== */
   const tbody = document.getElementById('tbody');
   const row = `
     <tr>
@@ -668,36 +674,162 @@
     </tr>`;
   tbody.innerHTML = row.repeat(8);
 
-  // dropdown
+  /* ============== CATEGORY MANAGEMENT ============== */
+  const categories = [
+    { id:'fav', name:'Danh mục yêu thích', count:0, isDefault:true }
+  ];
+  let activeCatId = 'fav';
+
   const favBtn = document.getElementById('favBtn');
   const favDropdown = document.getElementById('favDropdown');
-  favBtn.addEventListener('click', e=>{
-    e.stopPropagation();
-    favDropdown.classList.toggle('open');
-    favBtn.classList.toggle('open');
-    favBtn.classList.toggle('active');
-    // change placeholder when fav category active (state from image 2)
-    const inp = document.getElementById('searchStock');
-    if(favBtn.classList.contains('active')){
-      inp.placeholder = 'Thêm mã vào danh mục';
-    }else{
-      inp.placeholder = 'Tìm kiếm mã chứng khoán';
+  const catList = document.getElementById('catList');
+  const newCatInput = document.getElementById('newCatName');
+  const addCatBtn = document.getElementById('addCatBtn');
+  const searchStockInput = document.getElementById('searchStock');
+  const allFilterBtns = ()=>document.querySelectorAll('.filter-bar .filter-btn');
+
+  function escapeHtml(s){
+    const d=document.createElement('div'); d.textContent=s; return d.innerHTML;
+  }
+
+  function renderCategories(){
+    catList.innerHTML='';
+    categories.forEach(c=>{
+      const item=document.createElement('div');
+      item.className='dropdown-item'+(c.id===activeCatId?' selected':'');
+      item.dataset.id=c.id;
+
+      const info=document.createElement('div');
+      info.className='cat-info';
+      info.innerHTML=`<div class="name">${escapeHtml(c.name)}</div><div class="count">${c.count} mã</div>`;
+      info.addEventListener('click',()=>selectCategory(c.id));
+      item.appendChild(info);
+
+      if(!c.isDefault){
+        const actions=document.createElement('div');
+        actions.className='cat-actions';
+        actions.innerHTML=`
+          <button class="cat-act cat-edit" title="Sửa tên">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="cat-act cat-delete" title="Xóa">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>`;
+        actions.querySelector('.cat-edit').addEventListener('click',e=>{
+          e.stopPropagation(); renameCategory(c.id);
+        });
+        actions.querySelector('.cat-delete').addEventListener('click',e=>{
+          e.stopPropagation(); openConfirmDelete(c.id);
+        });
+        item.appendChild(actions);
+      }
+
+      catList.appendChild(item);
+    });
+  }
+
+  function selectCategory(id){
+    activeCatId=id;
+    renderCategories();
+  }
+
+  function addNewCategory(){
+    const name=newCatInput.value.trim();
+    if(!name) return;
+    const id='cat-'+Date.now();
+    categories.push({id, name, count:0, isDefault:false});
+    activeCatId=id;            // focus vào danh mục mới tạo
+    newCatInput.value='';
+    renderCategories();
+  }
+
+  function renameCategory(id){
+    const cat=categories.find(c=>c.id===id);
+    if(!cat) return;
+    const newName=prompt('Đổi tên danh mục:', cat.name);
+    if(newName!==null && newName.trim()){
+      cat.name=newName.trim();
+      renderCategories();
     }
+  }
+
+  /* ===== Confirm-delete modal ===== */
+  const confirmModal=document.getElementById('confirmModal');
+  const confirmCatName=document.getElementById('confirmCatName');
+  function openConfirmDelete(id){
+    const cat=categories.find(c=>c.id===id);
+    if(!cat) return;
+    confirmCatName.textContent=cat.name;
+    confirmModal.dataset.targetId=id;
+    confirmModal.classList.add('open');
+  }
+  function closeConfirmModal(){
+    confirmModal.classList.remove('open');
+    delete confirmModal.dataset.targetId;
+  }
+  document.getElementById('confirmCancel').addEventListener('click',closeConfirmModal);
+  document.getElementById('confirmOk').addEventListener('click',()=>{
+    const id=confirmModal.dataset.targetId;
+    const idx=categories.findIndex(c=>c.id===id);
+    if(idx>=0){
+      categories.splice(idx,1);
+      if(activeCatId===id) activeCatId=categories[0]?.id||null;
+      renderCategories();
+    }
+    closeConfirmModal();
   });
-  document.addEventListener('click', ()=>{
+  confirmModal.addEventListener('click',e=>{
+    if(e.target===confirmModal) closeConfirmModal();
+  });
+
+  /* + button + Enter key */
+  addCatBtn.addEventListener('click',addNewCategory);
+  newCatInput.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){ e.preventDefault(); addNewCategory(); }
+  });
+
+  renderCategories();
+
+  /* ============== FILTER BAR — single active ============== */
+  function setActiveFilter(btn){
+    allFilterBtns().forEach(b=>b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+  }
+
+  function closeFavDropdown(){
     favDropdown.classList.remove('open');
     favBtn.classList.remove('open');
-  });
-  favDropdown.addEventListener('click', e=>e.stopPropagation());
+    favBtn.classList.remove('active');
+    searchStockInput.placeholder='Tìm kiếm mã chứng khoán';
+  }
 
-  // annotation toggle
-  const annoBtn = document.getElementById('annoBtn');
-  const annoLabel = document.getElementById('annoLabel');
-  annoBtn.addEventListener('click', ()=>{
-    document.body.classList.toggle('show-anno');
-    const on = document.body.classList.contains('show-anno');
-    annoBtn.classList.toggle('on', on);
-    annoLabel.textContent = on ? 'Ẩn các action' : 'Hiện các action';
+  /* favBtn: toggle dropdown + trở thành filter active duy nhất khi mở */
+  favBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const willOpen=!favDropdown.classList.contains('open');
+    if(willOpen){
+      favDropdown.classList.add('open');
+      favBtn.classList.add('open');
+      setActiveFilter(favBtn);                      // bỏ active ở VN30 và các nút khác
+      searchStockInput.placeholder='Thêm mã vào danh mục';
+    } else {
+      closeFavDropdown();
+    }
+  });
+  favDropdown.addEventListener('click',e=>e.stopPropagation());
+
+  /* các filter button khác: click → đóng dropdown, đặt mình làm filter active */
+  allFilterBtns().forEach(b=>{
+    if(b===favBtn) return;
+    b.addEventListener('click',()=>{
+      setActiveFilter(b);
+      closeFavDropdown();
+    });
+  });
+
+  /* click ra ngoài: đóng dropdown */
+  document.addEventListener('click',()=>{
+    if(favDropdown.classList.contains('open')) closeFavDropdown();
   });
 </script>
 
