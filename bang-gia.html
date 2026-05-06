@@ -294,7 +294,7 @@
   }
   table.price-table tbody td.code{
     text-align:left;padding-left:14px;
-    font-weight:700;color:var(--green);
+    font-weight:700;
   }
   table.price-table tbody tr:hover{background:#fffaf3}
   .c-ceil{color:var(--purple)}
@@ -671,38 +671,132 @@
 </div>
 
 <script>
-  /* ============== PRICE TABLE ROWS ============== */
-  const tbody = document.getElementById('tbody');
-  const row = `
-    <tr>
-      <td class="code" data-action="Mở chi tiết mã">SHS</td>
-      <td class="num c-ceil">29,45</td>
-      <td class="num c-floor">25,65</td>
-      <td class="num c-ref">27,55</td>
-      <td class="num c-up">27,60</td>
-      <td class="num c-up">239.200</td>
-      <td class="num c-up">27,65</td>
-      <td class="num c-up">89.100</td>
-      <td class="num c-up">27,70</td>
-      <td class="num c-up">53.400</td>
-      <td class="num c-up">27,70</td>
-      <td class="num c-up">+0,15</td>
-      <td class="num c-up">+0,54%</td>
-      <td class="num c-up">100.000</td>
-      <td class="num c-up">27,75</td>
-      <td class="num c-up">19.200</td>
-      <td class="num c-up">27,80</td>
-      <td class="num c-up">236.200</td>
-      <td class="num c-up">27,85</td>
-      <td class="num c-up">136.900</td>
-      <td class="num c-up">27,90</td>
-      <td class="num c-down">27,40</td>
-      <td class="num c-muted">27,62</td>
-      <td class="num c-muted">27,623,000</td>
-      <td class="num c-muted">100.000</td>
-      <td class="num c-muted">100.000</td>
+  /* ============== PRICE TABLE ROWS — đúng quy luật màu chứng khoán VN ============== */
+  /* Trần=tím, Sàn=xanh dương, TC=vàng, Tăng=xanh lá, Giảm=đỏ
+     Bước giá: HOSE 10K-50K → 50đ (0,05); HOSE ≥50K → 100đ (0,10); HNX → 100đ (0,10) */
+  const stocks = [
+    /* HPG (HOSE, step 0,05) — TĂNG */
+    { code:'HPG', ceil:29.45, floor:25.65, ref:27.55,
+      buy:[[27.60,239200],[27.65,89100],[27.70,53400]],
+      match:[27.70, 0.15, 100000],
+      sell:[[27.75,19200],[27.80,236200],[27.85,136900]],
+      hi:27.80, lo:27.40, avg:27.62, totalVol:27623000,
+      fBuy:100000, fSell:50000 },
+
+    /* VNM (HOSE, step 0,10) — TRẦN */
+    { code:'VNM', ceil:67.50, floor:58.70, ref:63.10,
+      buy:[[67.50,350200],[67.50,420300],[67.50,180400]],
+      match:[67.50, 4.40, 850000],
+      sell:[[0,0],[0,0],[0,0]],
+      hi:67.50, lo:63.20, avg:65.30, totalVol:18540000,
+      fBuy:850000, fSell:0 },
+
+    /* VHM (HOSE, step 0,05) — SÀN */
+    { code:'VHM', ceil:44.40, floor:38.60, ref:41.50,
+      buy:[[0,0],[0,0],[38.60,15000]],
+      match:[38.60, -2.90, 320000],
+      sell:[[38.60,180000],[38.60,250000],[38.65,90000]],
+      hi:41.55, lo:38.60, avg:39.85, totalVol:9450000,
+      fBuy:50000, fSell:380000 },
+
+    /* FPT (HOSE, step 0,10) — THAM CHIẾU (mixed colors) */
+    { code:'FPT', ceil:132.10, floor:114.90, ref:123.50,
+      buy:[[123.20,45000],[123.30,85000],[123.40,40000]],
+      match:[123.50, 0, 280000],
+      sell:[[123.60,65000],[123.70,90000],[123.80,45000]],
+      hi:123.70, lo:123.30, avg:123.50, totalVol:1850000,
+      fBuy:120000, fSell:120000 },
+
+    /* SSI (HOSE, step 0,05) — GIẢM */
+    { code:'SSI', ceil:34.65, floor:30.15, ref:32.40,
+      buy:[[32.00,150000],[32.05,90000],[32.10,80000]],
+      match:[32.05, -0.35, 220000],
+      sell:[[32.15,60000],[32.20,140000],[32.25,75000]],
+      hi:32.40, lo:32.00, avg:32.15, totalVol:8920000,
+      fBuy:80000, fSell:150000 },
+
+    /* SHS (HNX, step 0,10) — TĂNG */
+    { code:'SHS', ceil:30.20, floor:24.80, ref:27.50,
+      buy:[[27.60,180000],[27.70,95000],[27.80,40000]],
+      match:[27.80, 0.30, 350000],
+      sell:[[27.90,55000],[28.00,210000],[28.10,140000]],
+      hi:28.00, lo:27.30, avg:27.75, totalVol:15240000,
+      fBuy:200000, fSell:90000 },
+
+    /* PVS (HNX, step 0,10) — GIẢM */
+    { code:'PVS', ceil:42.00, floor:34.40, ref:38.20,
+      buy:[[37.30,90000],[37.50,150000],[37.70,60000]],
+      match:[37.50, -0.70, 180000],
+      sell:[[37.80,45000],[37.90,120000],[38.00,80000]],
+      hi:38.20, lo:37.30, avg:37.65, totalVol:5840000,
+      fBuy:30000, fSell:120000 },
+
+    /* MWG (HOSE, step 0,10) — TRẦN */
+    { code:'MWG', ceil:60.30, floor:52.50, ref:56.40,
+      buy:[[60.30,180000],[60.30,250000],[60.30,420000]],
+      match:[60.30, 3.90, 950000],
+      sell:[[0,0],[0,0],[0,0]],
+      hi:60.30, lo:56.50, avg:58.50, totalVol:6230000,
+      fBuy:450000, fSell:0 }
+  ];
+
+  const fmtPrice = p => p.toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const fmtVol = v => v ? v.toLocaleString('vi-VN') : '';
+  const fmtChange = c => {
+    if(c===0) return '0,00';
+    return (c>0?'+':'-') + Math.abs(c).toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2});
+  };
+  const fmtPct = (c, ref) => {
+    const pct = c/ref*100;
+    if(pct===0) return '0,00%';
+    return (pct>0?'+':'-') + Math.abs(pct).toLocaleString('vi-VN',{minimumFractionDigits:2,maximumFractionDigits:2}) + '%';
+  };
+
+  function priceColor(p, s){
+    if(p===s.ceil)  return 'c-ceil';
+    if(p===s.floor) return 'c-floor';
+    if(p===s.ref)   return 'c-ref';
+    if(p>s.ref)     return 'c-up';
+    if(p<s.ref)     return 'c-down';
+    return 'c-muted';
+  }
+  function changeColor(c){
+    if(c>0) return 'c-up';
+    if(c<0) return 'c-down';
+    return 'c-ref';
+  }
+  function priceVolPair(p, v, s){
+    if(!p) return `<td class="num"></td><td class="num"></td>`;
+    const cls = priceColor(p, s);
+    return `<td class="num ${cls}">${fmtPrice(p)}</td><td class="num ${cls}">${fmtVol(v)}</td>`;
+  }
+
+  function renderRow(s){
+    const [matchP, change, matchVol] = s.match;
+    const mPCol = priceColor(matchP, s);
+    const cCol = changeColor(change);
+    return `<tr>
+      <td class="code ${mPCol}" data-action="Mở chi tiết mã">${s.code}</td>
+      <td class="num c-ceil">${fmtPrice(s.ceil)}</td>
+      <td class="num c-floor">${fmtPrice(s.floor)}</td>
+      <td class="num c-ref">${fmtPrice(s.ref)}</td>
+      ${s.buy.map(([p,v])=>priceVolPair(p,v,s)).join('')}
+      <td class="num ${mPCol}">${fmtPrice(matchP)}</td>
+      <td class="num ${cCol}">${fmtChange(change)}</td>
+      <td class="num ${cCol}">${fmtPct(change, s.ref)}</td>
+      <td class="num ${cCol}">${fmtVol(matchVol)}</td>
+      ${s.sell.map(([p,v])=>priceVolPair(p,v,s)).join('')}
+      <td class="num ${priceColor(s.hi, s)}">${fmtPrice(s.hi)}</td>
+      <td class="num ${priceColor(s.lo, s)}">${fmtPrice(s.lo)}</td>
+      <td class="num ${priceColor(s.avg, s)}">${fmtPrice(s.avg)}</td>
+      <td class="num c-muted">${fmtVol(s.totalVol)}</td>
+      <td class="num c-muted">${fmtVol(s.fBuy)}</td>
+      <td class="num c-muted">${fmtVol(s.fSell)}</td>
     </tr>`;
-  tbody.innerHTML = row.repeat(8);
+  }
+
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = stocks.map(renderRow).join('');
 
   /* ============== CATEGORY MANAGEMENT ============== */
   const categories = [
